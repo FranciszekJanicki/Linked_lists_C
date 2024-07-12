@@ -1,12 +1,12 @@
-#include "SinglyLinkedList.h"
+#include "CircularLinkedList.h"
 
 template <class T>
-SinglyLinkedList<T>::SinglyLinkedList() {
+CircularLinkedList<T>::CircularLinkedList() {
 
 }
 
 template <class T>
-SinglyLinkedList<T>::~SinglyLinkedList() {
+CircularLinkedList<T>::~CircularLinkedList() {
 
     for (int i = 0; i < length; ++i) {
         deleteNodeHead();
@@ -19,7 +19,7 @@ SinglyLinkedList<T>::~SinglyLinkedList() {
 template <class T>
 // dont have to be ptrs to ptrs as i dont change what ptrs are pointing at, just what
 // ptrs being members of ptrs are pointing at
-void SinglyLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
+void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
 
     Node<T> *newest = nullptr;
 
@@ -34,7 +34,7 @@ void SinglyLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeHead(const T &data) {
+void CircularLinkedList<T>::addNodeHead(const T &data) {
 
     Node<T> *newest = new Node<T>();
 
@@ -46,7 +46,7 @@ void SinglyLinkedList<T>::addNodeHead(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeTail(const T &data) {
+void CircularLinkedList<T>::addNodeTail(const T &data) {
 
     Node<T> *newest = nullptr;
 
@@ -54,14 +54,14 @@ void SinglyLinkedList<T>::addNodeTail(const T &data) {
     if (tail == nullptr) {
         newest = new Node<T>();
         newest->data = data;
-        newest->next = nullptr;
+        newest->next = head;
         tail = newest;
     } 
     // not empty
     else {
         newest = new Node<T>();
         newest->data = data;
-        newest->next = nullptr;
+        newest->next = head;
         tail->next = newest;
         tail = newest;
     }
@@ -70,7 +70,7 @@ void SinglyLinkedList<T>::addNodeTail(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::deleteNodeTail() {
+void CircularLinkedList<T>::deleteNodeTail() {
     // if list empty
     if (head == nullptr) return;
 
@@ -88,16 +88,6 @@ void SinglyLinkedList<T>::deleteNodeTail() {
     }
     // OR
     /*
-    // if list empty
-    if (length == 0) return;
-
-    // if list has 1 element
-    if (length == 1) {
-        delete head;
-        head = tail = nullptr;
-        return;
-    }
-
     // find second to last 
     Node<T> *current = head;
     for (int i = 0; i < length - 1; ++i) {
@@ -107,14 +97,14 @@ void SinglyLinkedList<T>::deleteNodeTail() {
 
     tail = current;
     free(tail->next);
-    tail->next = nullptr;
+    tail->next = head;
 
     current = nullptr;
     --length;
 }
 
 template <class T>
-void SinglyLinkedList<T>::deleteNodeHead() {
+void CircularLinkedList<T>::deleteNodeHead() {
     // if list empty
     if (length == 0) return;
 
@@ -134,7 +124,7 @@ void SinglyLinkedList<T>::deleteNodeHead() {
 }
 
 template <class T>
-void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
+void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
     // handle incorrect index, wont have to worry later
     if (index < 0 || index > length) return;
 
@@ -188,7 +178,7 @@ void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::removeNode(const T &index) {
+void CircularLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
     if (index < 0 || index > length) return;
 
@@ -234,7 +224,7 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::removeNodeElement(const T &data) {
+void CircularLinkedList<T>::removeNodeElement(const T &data) {
 
     Node<T> *current = head;
     Node<T> *previous = nullptr;
@@ -261,7 +251,7 @@ void SinglyLinkedList<T>::removeNodeElement(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::print() const {
+void CircularLinkedList<T>::print() const {
     // if list empty, avoid dereferencing nullptr
     if (head != nullptr) {
         Node<T> *current = head;
@@ -274,22 +264,22 @@ void SinglyLinkedList<T>::print() const {
 }
 
 template <class T>
-int SinglyLinkedList<T>::getLength() const {
+int CircularLinkedList<T>::getLength() const {
     return length;
 }
 
 template <class T>
-T *SinglyLinkedList<T>::getHead() const {
+T *CircularLinkedList<T>::getHead() const {
     return head;
 }
 
 template <class T>
-T *SinglyLinkedList<T>::getTail() const {
+T *CircularLinkedList<T>::getTail() const {
     return tail;
 }
 
 template <class T>
-Node<T> *SinglyLinkedList<T>::getNode(const int &index) const {
+Node<T> *CircularLinkedList<T>::getNode(const int &index) const {
     // handle incorrect index, wont have to worry later
     if (index < 0 || index > length) return nullptr;
 
@@ -304,6 +294,6 @@ Node<T> *SinglyLinkedList<T>::getNode(const int &index) const {
 }
 
 template <class T>
-T SinglyLinkedList<T>::getData(const int &index) const {
+T CircularLinkedList<T>::getData(const int &index) const {
     return getNode(index)->data;
 }

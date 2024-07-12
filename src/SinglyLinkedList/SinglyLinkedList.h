@@ -15,7 +15,7 @@ class SinglyLinkedList {
         Node<T> *head = nullptr;
         Node<T> *tail = nullptr;
         int length = 0;
-        void insertBetween(Node<T> *current, Node<T> *prev, const T &data);
+        void insertBetween(Node<T> *left, Node<T> *right, const T &data);
 
     public:
         SinglyLinkedList();
@@ -32,6 +32,8 @@ class SinglyLinkedList {
         int getLength() const;
         T *getHead() const;
         T *getTail() const;
+        Node<T> *getNode(const int& index) const;
+        T getData(const int& index) const;
 };
 
 #endif

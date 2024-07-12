@@ -1,5 +1,5 @@
-#ifndef DOUBLY_LINKED_LIST_H
-#define DOUBLY_LINKED_LIST_H
+#ifndef DOUBLY_CIRCULAR_LINKED_LIST_H
+#define DOUBLY_CIRCULAR_LINKED_LIST_H
 
 #include <stdio.h>
 
@@ -11,7 +11,7 @@ struct Node {
 };
 
 template <class T>
-class DoublyLinkedList {
+class DoublyCircularLinkedList {
     private:
         Node<T> *head = nullptr;
         Node<T> *tail = nullptr;
@@ -19,8 +19,8 @@ class DoublyLinkedList {
         void insertBetween(Node<T> *left, Node<T> *right, const T &data);
 
     public:
-        DoublyLinkedList();
-        ~DoublyLinkedList();
+        DoublyCircularLinkedList();
+        ~DoublyCircularLinkedList();
 
         void addNodeHead(const T &data);
         void addNodeTail(const T &data);
