@@ -119,12 +119,11 @@ void DoublyLinkedList<T>::deleteNodeHead() {
         return;
     }
 
-    // use temp because you need to release what's been under head before head changed addres
-    Node<T> *temp = head;
+    // dont need use temp because head->prev is what needs to be deleted
+
     head = head->next;
+    delete head->prev;
     head->prev = nullptr;
-    delete temp;
-    temp = nullptr;
 
     --length;
 }
@@ -137,15 +136,13 @@ void DoublyLinkedList<T>::insertNode(const int &index, const T &data) {
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
 
-    if (length == 0 && index == 0) addNodeHead(data); 
-    else if (length == index) addNodeTail(data);
+    if (index == 0) addNodeHead(data); // this function checks if length is 0
+    else if (index == length) addNodeTail(data); // this function checks if length is 0
     else {
-        int i;
-
         // check if its faster to iterate from the front or the back, find pointers to node on index and previous
         if (index < length/2) {
             current = head;
-            for (i = 0; i < index; ++i) {
+            for (int i = 0; i < index; ++i) {
                 previous = current;
                 current = current->next;
             }
@@ -160,62 +157,26 @@ void DoublyLinkedList<T>::insertNode(const int &index, const T &data) {
             insertBetween(current, previous, data); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
             // iterating backwards, the previous is on the right and current on the left !!!
         }
-    }
 
-    // OR
-    /*
-    int i;
-    while (current != nullptr) {
-
-        if (index < length/2) {
-            i = 0;
-            current = head;
-            if (i == index) {
-
-                if (current == head) addNodeHead(data);
-                else if (current == tail) addNodeTail(data);
-                else {
-                    insertBetween(previous, current, data);
-                }
-                return;
-            }
-
-            previous = current;
-            current = current->data;
-            ++i;
-
-        } else {
-            i = length;
-            current = tail;
-            if (i == index) {
-
-                if (current == head) addNodeHead(data);
-                else if (current == tail) addNodeTail(data);
-                else {
-                    insertBetween(current, previous, data); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
-                    // iterating backwards, the previous is on the right and current on the left !!!
-                }
-                return;
-            }
-
-            previous = current;
-            current = current->prev;
-            --i;
-    }
-    */   
-
-    // OR
-    /* 
-    if (index < 0 || index > length) return;
-
-    if (length == 0 && index == 0) addNodeHead(data); 
-    else if (length == index) addNodeTail(data);
-    else {
+        // OR
+        /* 
         current = getNode(index);
-        previous = getNode(index - 1);
+        previous = current->prev; // previous = getNode(index - 1);
         insertBetween(previous, current, data);
+        }
+        */
+
+        // OR
+        /* 
+        previous = getNode(index - 1);
+        current = previous->next; // current = getNode(index);
+        insertBetween(previous, current, data);
+        }
+        */
     }
-   */
+
+    current = nullptr;
+    previous = nullptr;
 }
 
 template <class T>
@@ -223,28 +184,45 @@ void DoublyLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
     if (index < 0 || index > length) return;
 
-    // erase node between previous and current->next
-    Node<T> *current = getNode(index);
-    Node<T> *previous = getNode(index - 1);
+    Node<T> *current = nullptr;
+    Node<T> *previous = nullptr;
 
-    previous->next = current->next;
-    (current->next)->prev = previous;
-    delete current;
+    if (index == 0) deleteNodeHead();    
+    else if (index == length) deleteNodeTail();
+    else {
+        // erase current node
+        current = getNode(index);
+        previous = current->prev; // previous = getNode(index - 1);
+        previous->next = current->next;
+        (current->next)->prev = previous;
+        delete current;
+        --length;
 
-    // OR
-    // erase node between current and previous
-    /*
-    current = getNode(index + 1);
-    previous = getNode(index - 1);
-    previous->next = current;
-    delete current->prev;
-    current->prev = previous;    
-    */
+        // OR
+        // erase node between current and previous
+        /*
+        current = getNode(index + 1);
+        previous = (current->prev)->prev; // previous = getNode(index - 1);
+        previous->next = current;
+        delete current->prev;
+        current->prev = previous;   
+        --length; 
+        */
+
+        // OR
+        // erase node between current and previous
+        /*
+        previous = getNode(index - 1);
+        current = (previous->next)->next;// current = getNode(index + 1); 
+        previous->next = current;
+        delete current->prev;
+        current->prev = previous;    
+        --length;
+        */
+    }
 
     current = nullptr;
     previous = nullptr;
-
-    --length;
 }
 
 template <class T>
@@ -261,6 +239,7 @@ void DoublyLinkedList<T>::removeNodeElement(const T &data) {
             else {
                 previous->next = current->next;
                 delete current;
+                --length;
             }
             // return; // dont stop iterating, remove all nodes with this data
         }

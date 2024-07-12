@@ -131,20 +131,28 @@ void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
 
-    if (length == 0 && index == 0) addNodeHead(data); 
-    else if (length == index) addNodeTail(data);
+    if (index == 0) addNodeHead(data); 
+    else if (index == length) addNodeTail(data);
     else {
+
+        // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        previous = getNode(index - 1);
+        current = previous->next; // current = getNode(index);
+        insertBetween(previous, current, data);
+
+        // OR
+        /*
         int i = 0;
-        Node<T> *current = head;
-        Node<T> *previous = nullptr;
+        current = head;
+        previous = nullptr;
 
         for (i; i < index; ++i) {
             previous = current;
             current = current->next;
         }
         insertBetween(previous, current, data);
+        */
     }
-
     // OR
     /* 
     int i = 0;
@@ -164,14 +172,7 @@ void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
         current = current->next;
         ++i;
     }
-    */
-
-    // OR
-    /*
-    current = getNode(index);
-    previous = getNode(index - 1);
-    insertBetween(previous, current, data);
-    */
+    */  
 
    previous = nullptr;
    current = nullptr;
@@ -182,10 +183,35 @@ void CircularLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
     if (index < 0 || index > length) return;
 
-    Node<T> *current = head;
+    Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
-    int i = 0;
 
+    if (index == 0) deleteNodeHead(); // this function checks if length is 0
+    else if (index == length) deleteNodeTail(); // this function checks if length is 0
+    else {
+        // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        previous = getNode(index - 1);
+        current = previous->next; // current = getNode(index);
+
+        previous->next = current->next;
+        delete current;
+        --length;
+
+        // OR
+        /*
+        // just need to find second to last to index (because you can calculate index by previous->next and one after by current->next)
+        previous = getNode(index - 1);
+        current = (previous->next)->next;// current = getNode(index + 1); 
+        delete previous->next;
+        previous->next = current;
+        --length;
+        */
+    }
+
+    // OR
+    /*
+    int i = 0;
+    current = head;
     while (current != nullptr) {
         
         if (i == index) {
@@ -194,6 +220,7 @@ void CircularLinkedList<T>::removeNode(const T &index) {
             else {
                 previous->next = current->next;
                 delete current;
+                --length;
             }
             return; // stop iterating
         }
@@ -202,22 +229,7 @@ void CircularLinkedList<T>::removeNode(const T &index) {
         current = current->next;
         ++i;
     }
-
-    // OR
-    /*
-    current = getNode(index);
-    previous = getNode(index - 1);
-    previous->next = current->next;
-    delete current;
     */
-
-   // OR
-   /*
-    current = getNode(index + 1);
-    previous = getNode(index - 1);
-    delete previous->next;
-    previous->next = current;
-   */
 
     previous = nullptr;
     current = nullptr;
