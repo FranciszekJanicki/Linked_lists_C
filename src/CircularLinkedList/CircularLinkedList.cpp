@@ -17,8 +17,6 @@ CircularLinkedList<T>::~CircularLinkedList() {
 }
 
 template <class T>
-// dont have to be ptrs to ptrs as i dont change what ptrs are pointing at, just what
-// ptrs being members of ptrs are pointing at
 void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
 
     Node<T> *newest = nullptr;
@@ -34,39 +32,51 @@ void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T
 }
 
 template <class T>
-void CircularLinkedList<T>::addNodeHead(const T &data) {
+void SinglyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
 
-    Node<T> *newest = new Node<T>();
-
-    newest->data = data;
+    // in single list dont have to check if list is empty or not for head insertion
+    newest = new Node<T>();
     newest->next = head;
     head = newest;
+    tail->next = head;
 
     ++length;
 }
 
 template <class T>
-void CircularLinkedList<T>::addNodeTail(const T &data) {
+void SinglyLinkedList<T>::addNodeHead(const T &data) {
 
     Node<T> *newest = nullptr;
+    addEmptyNodeHead(newest);
+    newest->data = data;
+}
+
+template <class T>
+void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+
+    newest = new Node<T>();
 
     // if list empty
-    if (tail == nullptr) {
-        newest = new Node<T>();
-        newest->data = data;
+    if (tail == nullptr) {        
         newest->next = head;
         tail = newest;
     } 
     // not empty
     else {
-        newest = new Node<T>();
-        newest->data = data;
         newest->next = head;
         tail->next = newest;
         tail = newest;
     }
 
     ++length;
+}
+
+template <class T>
+void SinglyLinkedList<T>::addNodeTail(const T &data) {
+
+    Node<T> *newest = nullptr;
+    addEmptyNodeTail(newest);
+    newest->data = data;
 }
 
 template <class T>
@@ -308,4 +318,37 @@ Node<T> *CircularLinkedList<T>::getNode(const int &index) const {
 template <class T>
 T CircularLinkedList<T>::getData(const int &index) const {
     return getNode(index)->data;
+}
+
+template <class T>
+void CircularLinkedList<T>::setData(const int &index, const T &data) {
+    getNode(index)->data = data;
+}
+
+template <class T>
+void CircularLinkedList<T>::assign(const T *array, const int length) {
+    if (array = nullptr || length == 0) return;
+
+    int sizeDifference = length - this->length;
+    int i;
+    if (sizeDifference > 0) {    
+        for (i = 0; i < sizeDifference; ++i) {
+            addEmptyNodeTail();
+        }
+    } else if (sizeDifference < 0) {
+        for (i = 0; i < -sizeDifference; ++i) {
+            deleteNodeTail();
+        }
+    }
+
+    /* this has shitty complexity as every iteration will call getNode function, which iterates to the index*/
+    /* for (i = 0; i < length; ++i) {
+        setData(i, array[i]);
+    } 
+    */
+    Node<T> *current = head;
+    for (i = 0; i < length; ++i) {
+        current->data = array[i];
+        current = current->next;
+    }
 }

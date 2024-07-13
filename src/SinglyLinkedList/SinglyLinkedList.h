@@ -23,6 +23,8 @@ class SinglyLinkedList {
 
         void addNodeHead(const T &data);
         void addNodeTail(const T &data);
+        void addEmptyNodeTail(Node<T>* &newest);
+        void addEmptyNodeHead(Node<T>* &newest);
         void deleteNodeTail();
         void deleteNodeHead();
         void insertNode(const int &index, const T &data);
@@ -32,8 +34,10 @@ class SinglyLinkedList {
         int getLength() const;
         T *getHead() const;
         T *getTail() const;
-        Node<T> *getNode(const int& index) const;
-        T getData(const int& index) const;
+        Node<T> *getNode(const int &index) const;
+        T getData(const int &index) const;
+        void setData(const int &index, const T &data);
+        void assign(const T *array, const int &length);
 };
 
 #endif

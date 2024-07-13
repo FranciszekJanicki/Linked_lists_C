@@ -42,6 +42,7 @@ void DoublyCircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, c
         newest = new Node<T>();
         newest->data = data;
         newest->next = right;
+        newest->prev = left;
         left->next = newest;
         right->prev = newest;
     }
@@ -50,25 +51,46 @@ void DoublyCircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, c
 }
 
 template <class T>
-void DoublyCircularLinkedList<T>::addNodeHead(const T &data) {
+void DoublyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
+   
+    newest = new Node<T>();
 
-    Node<T> *newest = new Node<T>();
-    newest->data = data;
-    newest->next = head;
-    newest->prev = tail;
+    // if list empty
+    if (head == nullptr) {
+        newest->next = head;
+        newest->prev = tail;
+        head = newest;
+        tail->next = head;
+    } 
+    // not empty
+    else {
+        newest->next = head;
+        newest->prev = tail;
+        head->prev = newest;
+        head = newest;
+        tail->next = head;
+    }
 
     ++length;
 }
 
 template <class T>
-void DoublyCircularLinkedList<T>::addNodeTail(const T &data) {
-
+void DoublyLinkedList<T>::addNodeHead(const T &data) {
+   
     Node<T> *newest = nullptr;
+    addEmptyNodeHead(newest);
+    newest->data = data;
 
+    ++length;
+}
+
+template <class T>
+void DoublyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+
+    newest = new Node<T>();
+    
     // if list empty
     if (tail == nullptr) {
-        newest = new Node<T>();
-        newest->data = data;
         newest->next = head;
         newest->prev = tail;
         tail = newest;
@@ -76,7 +98,6 @@ void DoublyCircularLinkedList<T>::addNodeTail(const T &data) {
     // not empty
     else {
         newest = new Node<T>();
-        newest->data = data;
         newest->next = head;
         newest->prev = tail;
         tail->next = newest;
@@ -86,6 +107,15 @@ void DoublyCircularLinkedList<T>::addNodeTail(const T &data) {
     ++length;
 }
 
+template <class T>
+void DoublyLinkedList<T>::addNodeTail(const T &data) {
+   
+    Node<T> *newest = nullptr;
+    addEmptyNodeTail(newest);
+    newest->data = data;
+
+    ++length;
+}
 template <class T>
 void DoublyCircularLinkedList<T>::deleteNodeTail() {
     // if list empty
@@ -236,8 +266,18 @@ void DoublyCircularLinkedList<T>::removeNodeElement(const T &data) {
             if (current == head) deleteNodeHead();
             else if (current == tail) deleteNodeTail();
             else {
+                // erase current node
                 previous->next = current->next;
+                current->next->prev = previous;
                 delete current;
+
+                // OR
+                // erase node between previous and current
+                /*
+                previous->next = current
+                delete current->prev;
+                current->prev = previous;
+                */
             }
             // return; // dont stop iterating, remove all nodes with this data
         }
@@ -307,4 +347,37 @@ Node<T> *DoublyCircularLinkedList<T>::getNode(const int &index) const {
 template <class T>
 T DoublyCircularLinkedList<T>::getData(const int &index) const {
     return getNode(index)->data;
+}
+
+template <class T>
+void DoublyCircularLinkedList<T>::setData(const int &index, const T &data) {
+    getNode(index)->data = data;
+}
+
+template <class T>
+void DoublyCircularLinkedList<T>::assign(const T *array, const int &length) {
+    if (array = nullptr || length == 0) return;
+
+    int sizeDifference = length - this->length;
+    int i;
+    if (sizeDifference > 0) {    
+        for (i = 0; i < sizeDifference; ++i) {
+            addEmptyNodeTail();
+        }
+    } else if (sizeDifference < 0) {
+        for (i = 0; i < -sizeDifference; ++i) {
+            deleteNodeTail();
+        }
+    }
+
+    /* this has shitty complexity as every iteration will call getNode function, which iterates to the index*/
+    /* for (i = 0; i < length; ++i) {
+        setData(i, array[i]);
+    } 
+    */
+    Node<T> *current = head;
+    for (i = 0; i < length; ++i) {
+        current->data = array[i];
+        current = current->next;
+    }
 }
