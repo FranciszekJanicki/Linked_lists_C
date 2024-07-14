@@ -304,7 +304,7 @@ void DoublyCircularLinkedList<T>::removeNode(const T &index) {
             previous->prev = next;
         }   
         */
-       
+
         // OR
         // swap previous and next when iterating backward and use same formula
         if (index < length/2) {
@@ -443,7 +443,8 @@ void DoublyCircularLinkedList<T>::assign(const T *array, const int &length) {
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
-            addEmptyNodeTail();
+            Node<T> *toAdd = nullptr;
+            addEmptyNodeTail(toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
