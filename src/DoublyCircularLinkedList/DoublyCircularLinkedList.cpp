@@ -41,41 +41,46 @@ void DoublyCircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, c
     if (right != left) {
         newest = new Node<T>();
         newest->data = data;
+        // join newest and right
         newest->next = right;
+        right->prev = newest;
+        // join newest and left
         newest->prev = left;
         left->next = newest;
-        right->prev = newest;
     }
 
     ++length;
 }
 
 template <class T>
-void DoublyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
+void DoublyCircularLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
    
     newest = new Node<T>();
 
     // if list empty
     if (head == nullptr) {
+        // join newest with head and tail and actualize
         newest->next = head;
         newest->prev = tail;
-        head = newest;
-        tail->next = head;
+        head = tail = newest;
     } 
     // not empty
     else {
+        // join newest and head
         newest->next = head;
-        newest->prev = tail;
         head->prev = newest;
+        // join newest ant tail
+        newest->prev = tail;
+        tail->next = newest;
+        // actualize head
         head = newest;
-        tail->next = head;
     }
 
     ++length;
 }
 
 template <class T>
-void DoublyLinkedList<T>::addNodeHead(const T &data) {
+void DoublyCircularLinkedList<T>::addNodeHead(const T &data) {
    
     Node<T> *newest = nullptr;
     addEmptyNodeHead(newest);
@@ -85,30 +90,34 @@ void DoublyLinkedList<T>::addNodeHead(const T &data) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+void DoublyCircularLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
 
     newest = new Node<T>();
     
     // if list empty
     if (tail == nullptr) {
+        // join newest with head and tail and actualize
         newest->next = head;
         newest->prev = tail;
-        tail = newest;
+        tail = head = newest;
     } 
     // not empty
     else {
-        newest = new Node<T>();
+        // join newest and head
         newest->next = head;
+        head->prev = newest;
+        // join newest and tail
         newest->prev = tail;
         tail->next = newest;
-        tail = newest;
+        // actualize tail
+        tail = newest;  
     }
 
     ++length;
 }
 
 template <class T>
-void DoublyLinkedList<T>::addNodeTail(const T &data) {
+void DoublyCircularLinkedList<T>::addNodeTail(const T &data) {
    
     Node<T> *newest = nullptr;
     addEmptyNodeTail(newest);
@@ -130,9 +139,13 @@ void DoublyCircularLinkedList<T>::deleteNodeTail() {
 
     // with doubly list you dont need to iterate to find second to last, because you have tail->prev
     // dont need to use temp, because you can use tail->next after changing tail addres to release deleted node
+    // actualize tail
     tail = tail->prev;
+    // free memory
     delete tail->next;
+    // join head and tail
     tail->next = head;
+    head->prev = tail;
 
     --length;
 }
@@ -149,10 +162,13 @@ void DoublyCircularLinkedList<T>::deleteNodeHead() {
         return;
     }
 
-    // dont need to use temp because deleted node is at head->prev (after changing head)
+    // actualize head
     head = head->next;
+    // free memory
     delete head->prev;
+    // join head and tail
     head->prev = tail;
+    tail->next = head;
 
     --length;
 }
@@ -215,6 +231,7 @@ void DoublyCircularLinkedList<T>::removeNode(const T &index) {
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
+    Node<T> *next = nullptr;
 
     if (index == 0) deleteNodeHead();    
     else if (index == length) deleteNodeTail();
@@ -222,32 +239,101 @@ void DoublyCircularLinkedList<T>::removeNode(const T &index) {
         // erase current node
         current = getNode(index);
         previous = current->prev; // previous = getNode(index - 1);
+        // join previous and next to current
         previous->next = current->next;
         (current->next)->prev = previous;
-        delete current;
+        // free memory
+        delete current; // delete getNode(index);
         --length;
 
         // OR
-        // erase node between current and previous
+        // erase node between previous and next
         /*
-        current = getNode(index + 1);
+        next = getNode(index + 1);
         previous = (current->prev)->prev; // previous = getNode(index - 1);
-        previous->next = current;
-        delete current->prev;
-        current->prev = previous;  
+        // free memory
+        delete previous->next; // delete getNode(index);
+        // join previous and next       
+        previous->next = next;
+        next->prev = previous;  
         --length;  
         */
 
         // OR
-        // erase node between current and previous
+        // erase node between previous and next
         /*
         previous = getNode(index - 1);
         current = (previous->next)->next;// current = getNode(index + 1); 
+        // free memory
+        delete previous->next; // delete getNode(index);
+        // join previous and current
         previous->next = current;
-        delete current->prev;
         current->prev = previous;  
         --length;  
         */
+
+       // OR
+       /*
+       if (index < length/2) {
+            // find previous and next
+            current = head;
+            for (int i = 0; i < index; ++i) {
+                previous = current;
+                current = current->next;
+            }
+            next = current->next;
+            // free memory
+            delete current;
+            previous->next = next;
+            next->prev = previous;
+            
+
+        } else {
+            // NOTE that here previous is on the right, next on the left, because of iterating backwards!
+            // find previous and next
+            current = tail;
+            for (int i = 0; i < index; ++i) {
+                previous = current;
+                current = current->prev;
+            }
+            next = current->prev;
+            // free memory
+            delete current;
+            // join next and previous (knowinh they are 'logically' swapped)
+            next->next = previous;
+            previous->prev = next;
+        }   
+        */
+       
+        // OR
+        // swap previous and next when iterating backward and use same formula
+        if (index < length/2) {
+            // find previous and next
+            current = head;
+            for (int i = 0; i < index; ++i) {
+                previous = current;
+                current = current->next;
+            }
+            next = current->next;
+            
+        } else {
+            // find previous and next
+            current = tail;
+            for (int i = 0; i < index; ++i) {
+                previous = current;
+                current = current->prev;
+            }
+            next = current->prev;
+            // swap
+            Node<T> *tmp = next;
+            next = previous;
+            previous = tmp;
+        }          
+        // free memory
+        delete current;
+        // join previous and next
+        previous->next = next;
+        next->prev = previous;
     }
 
     current = nullptr;
@@ -267,17 +353,11 @@ void DoublyCircularLinkedList<T>::removeNodeElement(const T &data) {
             else if (current == tail) deleteNodeTail();
             else {
                 // erase current node
+                // join previous and next to current
                 previous->next = current->next;
-                current->next->prev = previous;
+                (current->next)->prev = previous;
+                // free memory
                 delete current;
-
-                // OR
-                // erase node between previous and current
-                /*
-                previous->next = current
-                delete current->prev;
-                current->prev = previous;
-                */
             }
             // return; // dont stop iterating, remove all nodes with this data
         }
@@ -358,6 +438,7 @@ template <class T>
 void DoublyCircularLinkedList<T>::assign(const T *array, const int &length) {
     if (array = nullptr || length == 0) return;
 
+    // resize
     int sizeDifference = length - this->length;
     int i;
     if (sizeDifference > 0) {    

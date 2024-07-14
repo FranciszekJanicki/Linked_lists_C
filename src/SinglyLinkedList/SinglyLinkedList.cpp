@@ -37,6 +37,7 @@ void SinglyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
     // in single list dont have to check if list is empty or not for head insertion
     newest = new Node<T>();
     newest->next = head;
+    // actualize head
     head = newest;
 
     ++length;
@@ -58,12 +59,14 @@ void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
     // if list empty
     if (tail == nullptr) {        
         newest->next = nullptr;
+        // actualize tail
         tail = newest;
     } 
     // not empty
     else {
         newest->next = nullptr;
         tail->next = newest;
+        // actualize tail
         tail = newest;
     }
 
@@ -113,9 +116,11 @@ void SinglyLinkedList<T>::deleteNodeTail() {
         current = current->next;
     }
     */
-
+    // actualize tail
     tail = current;
-    free(tail->next);
+    // free memory
+    delete tail->next;
+    // actualize tail edge
     tail->next = nullptr;
 
     current = nullptr;
@@ -135,7 +140,9 @@ void SinglyLinkedList<T>::deleteNodeHead() {
     }
 
     Node<T> *temp = head;
+    // actualize head
     head = head->next;
+    // free memory
     delete temp;
 
     temp = nullptr;
@@ -155,6 +162,7 @@ void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
     else {
 
         // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        // find previous index and index
         previous = getNode(index - 1);
         current = previous->next; // current = getNode(index);
         insertBetween(previous, current, data);
@@ -204,25 +212,30 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
+    Node<T> *next = nullptr;
 
     if (index == 0) deleteNodeHead(); // this function checks if length is 0
     else if (index == length) deleteNodeTail(); // this function checks if length is 0
     else {
-        // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        // erase node between previous and current
+        // find previous index and index
         previous = getNode(index - 1);
         current = previous->next; // current = getNode(index);
-
+        // join previous and next to current
         previous->next = current->next;
+        // free memory
         delete current;
         --length;
 
         // OR
         /*
-        // just need to find second to last to index (because you can calculate index by previous->next and one after by current->next)
+        // erase node between previous and next
         previous = getNode(index - 1);
-        current = (previous->next)->next;// current = getNode(index + 1); 
+        next = (previous->next)->next;// next = current->next; // next = getNode(index + 1); 
+        // free memory
         delete previous->next;
-        previous->next = current;
+        // join previous and next
+        previous->next = next;
         --length;
         */
     }
@@ -237,7 +250,10 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
             if (current == head) deleteNodeHead();
             else if (current == tail) deleteNodeTail();
             else {
+                // erase current node
+                // join previous and next to current
                 previous->next = current->next;
+                // free memory
                 delete current;
                 --length;
             }
@@ -246,7 +262,7 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
 
         previous = current;
         current = current->next;
-        ++i;
+        ++i; 
     }
     */
 
@@ -267,7 +283,10 @@ void SinglyLinkedList<T>::removeNodeElement(const T &data) {
             if (current == head) deleteNodeHead();
             else if (current == tail) deleteNodeTail();
             else {
+                // erase current node
+                // join previous and next to current
                 previous->next = current->next;
+                // free memory
                 delete current;
                 --length;
             }
@@ -339,6 +358,7 @@ template <class T>
 void SinglyLinkedList<T>::assign(const T *array, const int &length) {
     if (array = nullptr || length == 0) return;
 
+    // resize
     int sizeDifference = length - this->length;
     int i;
     if (sizeDifference > 0) {    

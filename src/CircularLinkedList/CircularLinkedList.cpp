@@ -32,19 +32,29 @@ void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T
 }
 
 template <class T>
-void SinglyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
+void CircularLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
 
-    // in single list dont have to check if list is empty or not for head insertion
     newest = new Node<T>();
-    newest->next = head;
-    head = newest;
-    tail->next = head;
+
+    // if list empty
+    if (head == nullptr) {
+        newest->next = head;
+        // actualize head and tail
+        head = tail = newest;
+    }
+    // not empty
+    else {
+        newest->next = head;
+        // actualize head
+        head = newest;
+        tail->next = head;
+    }
 
     ++length;
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeHead(const T &data) {
+void DoublyCircularLinkedList<T>::addNodeHead(const T &data) {
 
     Node<T> *newest = nullptr;
     addEmptyNodeHead(newest);
@@ -52,19 +62,21 @@ void SinglyLinkedList<T>::addNodeHead(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+void CircularLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
 
     newest = new Node<T>();
 
     // if list empty
     if (tail == nullptr) {        
         newest->next = head;
-        tail = newest;
+        // actualize head and tail
+        head = tail = newest;
     } 
     // not empty
     else {
         newest->next = head;
         tail->next = newest;
+        // actualize tail
         tail = newest;
     }
 
@@ -72,7 +84,7 @@ void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeTail(const T &data) {
+void CircularLinkedList<T>::addNodeTail(const T &data) {
 
     Node<T> *newest = nullptr;
     addEmptyNodeTail(newest);
@@ -104,9 +116,10 @@ void CircularLinkedList<T>::deleteNodeTail() {
         current = current->next;
     }
     */
-
+    // actualize tail
     tail = current;
-    free(tail->next);
+    // free memory
+    delete tail->next;
     tail->next = head;
 
     current = nullptr;
@@ -126,12 +139,16 @@ void CircularLinkedList<T>::deleteNodeHead() {
     }
 
     Node<T> *temp = head;
+    // actualize head
     head = head->next;
+    tail->next = head;
+    // free memory
     delete temp;
 
     temp = nullptr;
     --length;
 }
+
 
 template <class T>
 void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
@@ -146,6 +163,7 @@ void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
     else {
 
         // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        // find previous index and index
         previous = getNode(index - 1);
         current = previous->next; // current = getNode(index);
         insertBetween(previous, current, data);
@@ -195,25 +213,30 @@ void CircularLinkedList<T>::removeNode(const T &index) {
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
+    Node<T> *next = nullptr;
 
     if (index == 0) deleteNodeHead(); // this function checks if length is 0
     else if (index == length) deleteNodeTail(); // this function checks if length is 0
     else {
-        // just need to find second to last to index (because you can calculate current (index) by previous->next)
+        // erase node between previous and current
+        // find previous index and index
         previous = getNode(index - 1);
         current = previous->next; // current = getNode(index);
-
+        // join previous and next to current
         previous->next = current->next;
+        // free memory
         delete current;
         --length;
 
         // OR
         /*
-        // just need to find second to last to index (because you can calculate index by previous->next and one after by current->next)
+        // erase node between previous and next
         previous = getNode(index - 1);
-        current = (previous->next)->next;// current = getNode(index + 1); 
+        next = (previous->next)->next;// next = current->next; // next = getNode(index + 1); 
+        // free memory
         delete previous->next;
-        previous->next = current;
+        // join previous and next
+        previous->next = next;
         --length;
         */
     }
@@ -228,7 +251,10 @@ void CircularLinkedList<T>::removeNode(const T &index) {
             if (current == head) deleteNodeHead();
             else if (current == tail) deleteNodeTail();
             else {
+                // erase current node
+                // join previous and next to current
                 previous->next = current->next;
+                // free memory
                 delete current;
                 --length;
             }
@@ -237,7 +263,7 @@ void CircularLinkedList<T>::removeNode(const T &index) {
 
         previous = current;
         current = current->next;
-        ++i;
+        ++i; 
     }
     */
 
@@ -258,8 +284,12 @@ void CircularLinkedList<T>::removeNodeElement(const T &data) {
             if (current == head) deleteNodeHead();
             else if (current == tail) deleteNodeTail();
             else {
+                // erase current node
+                // join previous and next to current
                 previous->next = current->next;
+                // free memory
                 delete current;
+                --length;
             }
             // return; // dont stop iterating, remove all nodes with this data
         }
@@ -326,9 +356,10 @@ void CircularLinkedList<T>::setData(const int &index, const T &data) {
 }
 
 template <class T>
-void CircularLinkedList<T>::assign(const T *array, const int length) {
+void CircularLinkedList<T>::assign(const T *array, const int &length) {
     if (array = nullptr || length == 0) return;
 
+    // resize
     int sizeDifference = length - this->length;
     int i;
     if (sizeDifference > 0) {    
