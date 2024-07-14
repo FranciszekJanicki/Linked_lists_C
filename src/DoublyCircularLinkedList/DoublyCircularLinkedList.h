@@ -15,8 +15,15 @@ class DoublyCircularLinkedList {
     private:
         Node<T> *head = nullptr;
         Node<T> *tail = nullptr;
-        int length = 0;
+        int capacity = 0;
+        int size = 0;
+
+        /* private methods as they do not have exception handling and should be run only inside other methods that do have it*/
+        void insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest);
         void insertBetween(Node<T> *left, Node<T> *right, const T &data);
+        void removeBetween(Node<T> *left, Node<T> *right);
+        void addEmptyNodeTail(Node<T>* &newest);
+        void addEmptyNodeHead(Node<T>* &newest);
 
     public:
         DoublyCircularLinkedList();
@@ -24,15 +31,14 @@ class DoublyCircularLinkedList {
 
         void addNodeHead(const T &data);
         void addNodeTail(const T &data);
-        void addEmptyNodeTail(Node<T>* &newest);
-        void addEmptyNodeHead(Node<T>* &newest);
         void deleteNodeTail();
         void deleteNodeHead();
         void insertNode(const int &index, const T &data);
         void removeNode(const T &index);
         void removeNodeElement(const T &data);
         void print() const;
-        int getLength() const;
+        int getCapacity() const;
+        int getSize() const;
         T *getHead() const;
         T *getTail() const;
         Node<T> *getNode(const int &index) const;
@@ -40,5 +46,7 @@ class DoublyCircularLinkedList {
         void setData(const int &index, const T &data);
         void assign(const T *array, const int &length);
 };
+
+
 
 #endif

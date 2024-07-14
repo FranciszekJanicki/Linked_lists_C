@@ -8,7 +8,7 @@ CircularLinkedList<T>::CircularLinkedList() {
 template <class T>
 CircularLinkedList<T>::~CircularLinkedList() {
 
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < capacity; ++i) {
         deleteNodeHead();
     }
 
@@ -17,18 +17,38 @@ CircularLinkedList<T>::~CircularLinkedList() {
 }
 
 template <class T>
+void CircularLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest) {
+
+    newest = new Node<T>();
+    newest->next = right;
+    left->next = newest;
+
+    ++capacity;
+}
+
+template <class T>
 void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
 
     Node<T> *newest = nullptr;
 
     if (left != right) {
-        newest = new Node<T>();
+        insertEmptyBetween(left, right, newest);
         newest->data = data;
-        newest->next = right;
-        left->next = newest;
+        ++size;
     }
+}
 
-    ++length;
+template <class T>
+void CircularLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
+
+    if (right != left && left->next != right) {
+        // free memory
+        delete left->next;
+        // join left and right
+        left->next = right;
+        --size;
+        --capacity;
+    }
 }
 
 template <class T>
@@ -50,15 +70,17 @@ void CircularLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
         tail->next = head;
     }
 
-    ++length;
+    ++capacity;
 }
 
 template <class T>
-void DoublyCircularLinkedList<T>::addNodeHead(const T &data) {
+void CircularLinkedList<T>::addNodeHead(const T &data) {
 
     Node<T> *newest = nullptr;
     addEmptyNodeHead(newest);
     newest->data = data;
+    
+    ++size;
 }
 
 template <class T>
@@ -80,7 +102,7 @@ void CircularLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
         tail = newest;
     }
 
-    ++length;
+    ++capacity;
 }
 
 template <class T>
@@ -89,6 +111,8 @@ void CircularLinkedList<T>::addNodeTail(const T &data) {
     Node<T> *newest = nullptr;
     addEmptyNodeTail(newest);
     newest->data = data;
+
+    ++size;
 }
 
 template <class T>
@@ -112,7 +136,7 @@ void CircularLinkedList<T>::deleteNodeTail() {
     /*
     // find second to last 
     Node<T> *current = head;
-    for (int i = 0; i < length - 1; ++i) {
+    for (int i = 0; i < capacity - 1; ++i) {
         current = current->next;
     }
     */
@@ -123,16 +147,17 @@ void CircularLinkedList<T>::deleteNodeTail() {
     tail->next = head;
 
     current = nullptr;
-    --length;
+    --capacity;
+    --size;
 }
 
 template <class T>
 void CircularLinkedList<T>::deleteNodeHead() {
     // if list empty
-    if (length == 0) return;
+    if (capacity == 0) return;
 
     // if list has 1 element
-    if (length == 1) {
+    if (capacity == 1) {
         delete head;
         head = tail = nullptr;
         return;
@@ -146,20 +171,21 @@ void CircularLinkedList<T>::deleteNodeHead() {
     delete temp;
 
     temp = nullptr;
-    --length;
+    --capacity;
+    --size;
 }
 
 
 template <class T>
 void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
     // handle incorrect index, wont have to worry later
-    if (index < 0 || index > length) return;
+    if (index < 0 || index > capacity) return;
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
 
     if (index == 0) addNodeHead(data); 
-    else if (index == length) addNodeTail(data);
+    else if (index == capacity) addNodeTail(data);
     else {
 
         // just need to find second to last to index (because you can calculate current (index) by previous->next)
@@ -209,35 +235,26 @@ void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
 template <class T>
 void CircularLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
-    if (index < 0 || index > length) return;
+    if (index < 0 || index > capacity) return;
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
     Node<T> *next = nullptr;
 
-    if (index == 0) deleteNodeHead(); // this function checks if length is 0
-    else if (index == length) deleteNodeTail(); // this function checks if length is 0
+    if (index == 0) deleteNodeHead(); // this function checks if capacity is 0
+    else if (index == capacity) deleteNodeTail(); // this function checks if capacity is 0
     else {
-        // erase node between previous and current
-        // find previous index and index
+        // erase current node
         previous = getNode(index - 1);
         current = previous->next; // current = getNode(index);
-        // join previous and next to current
-        previous->next = current->next;
-        // free memory
-        delete current;
-        --length;
+        removeBetween(previous, current->next);
 
         // OR
         /*
-        // erase node between previous and next
+        // erase node between previous and next (erase current node)
         previous = getNode(index - 1);
         next = (previous->next)->next;// next = current->next; // next = getNode(index + 1); 
-        // free memory
-        delete previous->next;
-        // join previous and next
-        previous->next = next;
-        --length;
+        removeBetween(previous, current->next);
         */
     }
 
@@ -252,11 +269,8 @@ void CircularLinkedList<T>::removeNode(const T &index) {
             else if (current == tail) deleteNodeTail();
             else {
                 // erase current node
-                // join previous and next to current
-                previous->next = current->next;
-                // free memory
-                delete current;
-                --length;
+                removeBetween(previous, current->next);
+      
             }
             return; // stop iterating
         }
@@ -289,7 +303,13 @@ void CircularLinkedList<T>::removeNodeElement(const T &data) {
                 previous->next = current->next;
                 // free memory
                 delete current;
-                --length;
+                --capacity;
+                --size;
+
+                // OR
+                // erase current node
+                removeBetween(previous, current->next);
+
             }
             // return; // dont stop iterating, remove all nodes with this data
         }
@@ -307,7 +327,7 @@ void CircularLinkedList<T>::print() const {
     // if list empty, avoid dereferencing nullptr
     if (head != nullptr) {
         Node<T> *current = head;
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < capacity; ++i) {
             printf(nullptr, current->data);
             current = current->next;
         }
@@ -316,8 +336,13 @@ void CircularLinkedList<T>::print() const {
 }
 
 template <class T>
-int CircularLinkedList<T>::getLength() const {
-    return length;
+int CircularLinkedList<T>::getCapacity() const {
+    return capacity;
+}
+
+template <class T>
+int CircularLinkedList<T>::getSize() const {
+    return size;
 }
 
 template <class T>
@@ -333,7 +358,7 @@ T *CircularLinkedList<T>::getTail() const {
 template <class T>
 Node<T> *CircularLinkedList<T>::getNode(const int &index) const {
     // handle incorrect index, wont have to worry later
-    if (index < 0 || index > length) return nullptr;
+    if (index < 0 || index > capacity) return nullptr;
 
     Node<T> *current = head;
     int i = 0;
@@ -357,10 +382,10 @@ void CircularLinkedList<T>::setData(const int &index, const T &data) {
 
 template <class T>
 void CircularLinkedList<T>::assign(const T *array, const int &length) {
-    if (array = nullptr || length == 0) return;
+    if (array = nullptr || capacity == 0) return;
 
     // resize
-    int sizeDifference = length - this->length;
+    int sizeDifference = length - this->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
@@ -374,13 +399,14 @@ void CircularLinkedList<T>::assign(const T *array, const int &length) {
     }
 
     /* this has shitty complexity as every iteration will call getNode function, which iterates to the index*/
-    /* for (i = 0; i < length; ++i) {
+    /* for (i = 0; i < capacity; ++i) {
         setData(i, array[i]);
     } 
     */
     Node<T> *current = head;
-    for (i = 0; i < length; ++i) {
+    for (i = 0; i < capacity; ++i) {
         current->data = array[i];
         current = current->next;
     }
 }
+
