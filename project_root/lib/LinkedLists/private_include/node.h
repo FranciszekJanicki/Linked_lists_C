@@ -3,7 +3,7 @@
 
 typedef int T;
 
-typedef struct {
+typedef struct Node {
     Node *next;
     Node *prev;
     T data;

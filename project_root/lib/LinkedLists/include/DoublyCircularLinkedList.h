@@ -40,11 +40,14 @@ void insertNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex, cons
 void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex);
 void removeNodeElement(DoublyCircularLinkedListHandle_t handle, const T *pData);
 void print(DoublyCircularLinkedListHandle_t handle);
-int getCapacity(DoublyCircularLinkedListHandle_t handle;
+int getCapacity(DoublyCircularLinkedListHandle_t handle);
 int getSize(DoublyCircularLinkedListHandle_t handle);
 Node *getHead(DoublyCircularLinkedListHandle_t handle);
 Node *getTail(DoublyCircularLinkedListHandle_t handle);
 Node *getNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex);
-T getpData(DoublyCircularLinkedListHandle_t handle, const int *pIndex);
-void setpData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T pData);
-void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *length);
+T getData(DoublyCircularLinkedListHandle_t handle, const int *pIndex);
+void setData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T pData);
+void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *pLength);
+
+
+#endif // DOUBLY_CIRCULAR_LINKED_LIST_H

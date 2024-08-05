@@ -15,25 +15,40 @@ typedef struct {
 
 typedef DoublyLinkedList* DoublyLinkedListHandle_t;
 
+
+/* returns handle (pointer) */
+SinglyLinkedListHandle_t listCreateDynamic();
+/* returns object */
+SinglyLinkedList listCreateStatic();
+/* passing pointer to handle, changes what handle is pointing at */
+void listCreateDynamicVoid(SinglyLinkedListHandle_t *handle, const ListConfig_t *config);
+/* passing handle, changes object under handle */
+void listCreateStaticVoid(SinglyLinkedList *object);
+/* passing handle, but it could be nice to pass ptr to Handle to point it to NULL after deallocation */
+void listDelete(SinglyLinkedListHandle_t handle);
+
 /* private methods as they do not have exception handling and should be run only inside other methods that do have it*/
-void insertEmptyBetween(Node *left, Node *right, Node* &newest);
-void insertBetween(Node *left, Node *right, const T *data);
-void removeBetween(Node *left, Node *right);
-void addEmptyNodeTail(Node* &newest);
-void addEmptyNodeHead(Node* &newest);
-void addNodeHead(const T *data);
-void addNodeTail(const T *data);
-void deleteNodeTail();
-void deleteNodeHead();
-void insertNode(const int &index, const T *data);
-void removeNode(const T &index);
-void removeNodeElement(const T *data);
-void print();
+void insertEmptyBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest);
+void insertBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, const T *pData);
+void removeBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right);
+void addEmptyNodeTail(DoublyLinkedListHandle_t handle, Node* *pNewest);
+void addEmptyNodeHead(DoublyLinkedListHandle_t handle, Node* *pNewest);
+void addNodeHead(DoublyLinkedListHandle_t handle, const T *pData);
+void addNodeTail(DoublyLinkedListHandle_t handle, const T *pData);
+void deleteNodeTail(DoublyLinkedListHandle_t handle);
+void deleteNodeHead(DoublyLinkedListHandle_t handle);
+void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData);
+void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex);
+void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData);
+void print(DoublyLinkedListHandle_t handle);
 int getCapacity();
-int getSize();
+int getSize(DoublyLinkedListHandle_t handle);
 Node *getHead();
-Node *getTail();
-Node *getNode(const int &index);
-T getData(const int &index);
-void setData(const int &index, const T *data);
-void assign(const T *array, const int &length);
+Node *getTail(DoublyLinkedListHandle_t handle);
+Node *getNode(DoublyLinkedListHandle_t handle, const int *pIndex);
+T getData(DoublyLinkedListHandle_t handle, const int *pIndex);
+void setData(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData);
+void assign(DoublyLinkedListHandle_t handle, const T *array, const int *pLength);
+
+
+#endif // DOUBLY_LINKED_LIST_H

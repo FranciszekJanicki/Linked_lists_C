@@ -1,37 +1,42 @@
-#ifndef DOUBLY_CIRCULAR_LINKED_LIST_H
-#define DOUBLY_CIRCULAR_LINKED_LIST_H
-
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "DoublyCircularLinkedList.h"
+#include "node.h"
 
-
-void insertEmptyBetween(Node *left, Node *right, Node* &newest) {
+void insertEmptyBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
+    assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next == right && right->prev == left);
 
-    newest = (Node *)malloc(sizeof(Node));
+    *pNewest = (Node *)malloc(sizeof(Node));
     // join newest and right
-    newest->next = right;
-    right->prev = newest;
+    *pNewest->next = right;
+    right->prev = *pNewest;
     // join newest and left
-    newest->prev = left;
-    left->next = newest;
+    *pNewest->prev = left;
+    left->next = *pNewest;
 
     ++handle->capacity;
 }
 
 
-void insertBetween(Node *left, Node *right, const T *pData) {
+void insertBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right, const T *pData) {
+    assert(handle != NULL);
+    assert(left != NULL && right != NULL);
+    assert(left->next->next == right && right->prev->prev == left);
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    handle->insertEmptyBetween(left, right, newest);
+    insertEmptyBetween(left, right, newest);
     newest->data = *pData;
     
     ++handle->size;
 }
 
 
-void removeBetween(Node *left, Node *right) {
+void removeBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right) {
+    assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next->next == right && right->prev->prev == left);
 
@@ -46,80 +51,88 @@ void removeBetween(Node *left, Node *right) {
 }
 
 
-void addEmptyNodeHead(Node* &newest) {
-   
-    newest = (Node *)malloc(sizeof(Node));
+void addEmptyNodeHead(DoublyCircularLinkedListHandle_t handle, Node* *pNewest) {
+    assert(handle != NULL);
+
+    *pNewest = (Node *)malloc(sizeof(Node));
 
     // if list empty
     if (handle->head == NULL) {
         // join newest with head and tail and actualize
-        newest->next = handle->head;
-        newest->prev = handle->tail;
-        handle->head = handle->tail = newest;
+        *pNewest->next = handle->head;
+        *pNewest->prev = handle->tail;
+        *pNewest->head = handle->tail = *pNewest;
     } 
     // not empty
     else {
         // join newest and head
-        newest->next = handle->head;
-        handle->head->prev = newest;
+        *pNewest->next = handle->head;
+        handle->head->prev = *pNewest;
         // join newest ant tail
-        newest->prev = handle->tail;
-        handle->tail->next = newest;
+        *pNewest->prev = handle->tail;
+        handle->tail->next = *pNewest;
         // actualize head
-        handle->head = newest;
+        handle->head = *pNewest;
     }
 
     ++handle->capacity;
 }
 
 
-void addNodeHead(const T *pData) {
-   
+void addNodeHead(DoublyCircularLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);   
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    handle->addEmptyNodeHead(newest);
+    addEmptyNodeHead(newest);
     newest->data = *pData;
 
     ++handle->size;
 }
 
 
-void addEmptyNodeTail(Node* &newest) {
+void addEmptyNodeTail(DoublyCircularLinkedListHandle_t handle, Node* *pNewest) {
+    assert(handle != NULL);
 
-    newest = (Node *)malloc(sizeof(Node));
+    *pNewest = (Node *)malloc(sizeof(Node));
     
     // if list empty
     if (handle->tail == NULL) {
         // join newest with head and tail and actualize
-        newest->next = handle->head;
-        newest->prev = handle->tail;
-        handle->tail = handle->head = newest;
+        *pNewest->next = handle->head;
+        *pNewest->prev = handle->tail;
+        handle->tail = handle->head = *pNewest;
     } 
     // not empty
     else {
         // join newest and head
-        newest->next = handle->head;
-        handle->head->prev = newest;
+        *pNewest->next = handle->head;
+        handle->head->prev = *pNewest;
         // join newest and tail
-        newest->prev = handle->tail;
-        handle->tail->next = newest;
+        *pNewest->prev = handle->tail;
+        handle->tail->next = *pNewest;
         // actualize tail
-        handle->tail = newest;  
+        handle->tail = *pNewest;  
     }
 
     ++handle->capacity;
 }
 
 
-void addNodeTail(const T *pData) {
+void addNodeTail(DoublyCircularLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);
+    assert(pData != NULL);
    
     Node *newest = NULL;
-    handle->addEmptyNodeTail(newest);
+    addEmptyNodeTail(newest);
     newest->data = *pData;
 
     ++handle->size;
 }
 
-void deleteNodeTail(handle) {
+void deleteNodeTail(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     // if list empty
     if (handle->head == NULL) return;
 
@@ -145,7 +158,9 @@ void deleteNodeTail(handle) {
 }
 
 
-void deleteNodeHead(handle) {
+void deleteNodeHead(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     // if list empty
     if (handle->capacity == 0) return;
 
@@ -169,15 +184,19 @@ void deleteNodeHead(handle) {
 }
 
 
-void insertNode(const int *pIndex, const T *pData) {
+void insertNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);    
+    assert(pData != NULL);
+
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) handle->addNodeHead(pData); // handle function checks if capacity is 0
-    else if (*pIndex == handle->capacity - 1) handle->addNodeTail(pData); // handle function checks if capacity is 0
+    if (*pIndex == 0) addNodeHead(pData); // handle function checks if capacity is 0
+    else if (*pIndex == handle->capacity - 1) addNodeTail(pData); // handle function checks if capacity is 0
     else {
         // check if its faster to iterate from the front or the back, find pointers to node on pIndex and previous
         if (*pIndex < handle->capacity/2) {
@@ -186,7 +205,7 @@ void insertNode(const int *pIndex, const T *pData) {
                 previous = current;
                 current = current->next;
             }
-            handle->insertBetween(previous, current, pData);
+            insertBetween(previous, current, pData);
 
         } else {
             current = handle->tail;
@@ -194,23 +213,23 @@ void insertNode(const int *pIndex, const T *pData) {
                 previous = current;
                 current = current->prev;
             }
-            handle->insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
+            insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
             // iterating backwards, the previous is on the right and current on the left !!!
         }
 
         // OR
         /* 
-        current = handle->getNode(*pIndex);
-        previous = current->prev; // previous = handle->getNode(*pIndex - 1);
-        handle->insertBetween(previous, current, pData);
+        current = getNode(handle, *pIndex);
+        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        insertBetween(previous, current, pData);
         }
         */
 
         // OR
         /* 
-        previous = handle->getNode(*pIndex - 1);
-        current = previous->next; // current = handle->getNode(*pIndex);
-        handle->insertBetween(previous, current, pData);
+        previous = getNode(handle, *pIndex - 1);
+        current = previous->next; // current = getNode(handle, *pIndex);
+        insertBetween(previous, current, pData);
         }
         */
     }
@@ -220,7 +239,10 @@ void insertNode(const int *pIndex, const T *pData) {
 }
 
 
-void removeNode(const T *pIndex) {
+void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);    
+
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
@@ -228,28 +250,28 @@ void removeNode(const T *pIndex) {
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) handle->deleteNodeHead(handle);    
-    else if (*pIndex == handle->capacity - 1) handle->deleteNodeTail(handle);
+    if (*pIndex == 0) deleteNodeHead(handle);    
+    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
     else {
         // erase current node
-        current = handle->getNode(*pIndex);
-        previous = current->prev; // previous = handle->getNode(*pIndex - 1);
-        handle->removeBetween(previous, current->next);
+        current = getNode(handle, *pIndex);
+        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        removeBetween(previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
-        next = handle->getNode(*pIndex + 1);
-        previous = (current->prev)->prev; // previous = handle->getNode(*pIndex - 1);
-        handle->removeBetween(previous, next);
+        next = getNode(handle, *pIndex + 1);
+        previous = (current->prev)->prev; // previous = getNode(handle, *pIndex - 1);
+        removeBetween(previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
-        previous = handle->getNode(*pIndex - 1);
-        next = (previous->next)->next;// next = handle->getNode(*pIndex + 1); 
-        handle->removeBetween(previous, next);
+        previous = getNode(handle, *pIndex - 1);
+        next = (previous->next)->next;// next = getNode(handle, *pIndex + 1); 
+        removeBetween(previous, next);
         */
 
        // OR
@@ -310,7 +332,7 @@ void removeNode(const T *pIndex) {
         //     previous = tmp;
         // }          
 
-        // handle->removeBetween(previous, next);
+        // removeBetween(previous, next);
     }
 
     current = NULL;
@@ -319,7 +341,9 @@ void removeNode(const T *pIndex) {
 }
 
 
-void removeNodeElement(const T *pData) {
+void removeNodeElement(DoublyCircularLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);   
+    assert(pData != NULL);
 
     Node *current = handle->head;
     Node *previous = NULL;
@@ -327,8 +351,8 @@ void removeNodeElement(const T *pData) {
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == handle->head) handle->deleteNodeHead(handle);
-            else if (current == handle->tail) handle->deleteNodeTail(handle);
+            if (current == handle->head) deleteNodeHead(handle);
+            else if (current == handle->tail) deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
@@ -339,7 +363,7 @@ void removeNodeElement(const T *pData) {
 
                 // OR
                 // erase current node
-                handle->removeBetween(previous, current->next);
+                removeBetween(previous, current->next);
             }
             // return; // dont stop iterating, remove all nodes with handle pData
         }
@@ -353,7 +377,9 @@ void removeNodeElement(const T *pData) {
 }
 
 
-void print(handle) {
+void print(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     // if list empty then dont dereference NULLs!
     if (handle->head != NULL) {
         Node *current = handle->head;
@@ -366,34 +392,45 @@ void print(handle) {
 }
 
 
-int getCapacity(handle) {
+int getCapacity(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     return handle->capacity;
 }
 
 
-int getSize(handle) {
+int getSize(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     return handle->size;
 }
 
 
-Node *getHead(handle) {
+Node *getHead(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     return handle->head;
 }
 
 
-Node *getTail(handle) {
+Node *getTail(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     return handle->tail;
 }
 
 
-Node *getNode(const int *pIndex) {
+Node *getNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);  
+
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
 
-    if (*pIndex == 0) return handle->getHead(handle);
-    else if (*pIndex == handle->capacity - 1) return handle->getTail(handle);
+    if (*pIndex == 0) return getHead(handle);
+    else if (*pIndex == handle->capacity - 1) return getTail(handle);
     else {
         // check if its faster to iterate from the back or the front
         if (*pIndex < handle->capacity/2) {
@@ -416,31 +453,40 @@ Node *getNode(const int *pIndex) {
 }
 
 
-T getData(const int *pIndex) {
-    return handle->getNode(*pIndex)->data;
+T getData(DoublyCircularLinkedListHandle_t handle, const int *pIndex) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);  
+
+    return getNode(handle, *pIndex)->data;
 }
 
 
-void setData(const int *pIndex, const T *pData) {
-    handle->getNode(*pIndex)->data = *pData;
+void setData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);    
+    assert(pData != NULL);
+
+    getNode(handle, *pIndex)->data = *pData;
 }
 
 
 
-void assign(const T *array, const int &length) {
+void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *pLength) {
+    assert(handle != NULL);
+    assert(pLength != NULL);
     assert(array != NULL && length > 0);
 
     // resize
-    int sizeDifference = length - handle->capacity;
+    int sizeDifference = *pLength - handle->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            handle->addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
-            handle->deleteNodeTail(handle);
+            deleteNodeTail(handle);
         }
     }
 
@@ -455,6 +501,3 @@ void assign(const T *array, const int &length) {
         current = current->next;
     }
 }
-
-
-#endif

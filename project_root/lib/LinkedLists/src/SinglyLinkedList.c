@@ -1,7 +1,8 @@
 #include "SinglyLinkedList.h"
 #include <stdio.h>
 #include <assert.h>
-
+#include <stdlib.h>
+#include "node.h"
 
 SinglyLinkedListHandle_t listCreateDynamic() {
     SinglyLinkedListHandle_t handle = (SinglyLinkedListHandle_t)malloc(sizeof(SinglyLinkedList));
@@ -25,6 +26,7 @@ void listCreateDynamicVoid(SinglyLinkedListHandle_t *pHandle) {
 }
 
 void listCreateStaticVoid(SinglyLinkedListHandle_t handle, ListConfig_t config) {
+    assert(handle != NULL);
     // do something with handle
     handle->size = config.size;
     handle->capacity = config.capacity;
@@ -39,7 +41,7 @@ void listDelete(SinglyLinkedListHandle_t handle) {
     //     current = current->next;
     // }
     for (int i = 0; i < handle->capacity; ++i) {
-            handle->deleteNodeHead(handle);
+            deleteNodeHead(handle);
     }
 
     if (handle->head != NULL) delete handle->head;
@@ -47,6 +49,7 @@ void listDelete(SinglyLinkedListHandle_t handle) {
 }
 
 void insertEmptyBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
+    assert(pNewest != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next == right);
 
@@ -59,8 +62,12 @@ void insertEmptyBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right
 
 
 void insertBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, const T *pData) {
+    assert(left != NULL && right != NULL);
+    assert(left->next == right);
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    handle->insertEmptyBetween(handle, left, right, &newest);
+    insertEmptyBetween(handle, left, right, &newest);
     newest->data = *pData;
 
     ++handle->size;
@@ -68,6 +75,7 @@ void insertBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, con
 
 
 void removeBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right) {
+    assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next->next == right);
 
@@ -82,6 +90,8 @@ void removeBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right) {
 
 
 void addEmptyNodeHead(SinglyLinkedListHandle_t handle, Node* *pNewest) {
+    assert(handle != NULL);
+
     // in single list dont have to check if list is empty or not for head insertion
     *pNewest = (Node *)malloc(sizeof(Node));
     *pNewest->next = handle->head;
@@ -93,9 +103,11 @@ void addEmptyNodeHead(SinglyLinkedListHandle_t handle, Node* *pNewest) {
 
 
 void addNodeHead(SinglyLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);
+    assert(pData != NULL);
 
     Node *newest = NULL;
-    handle->addEmptyNodeHead(&newest);
+    addEmptyNodeHead(&newest);
     newest->data = *pData;
     
     ++handle->size;
@@ -103,7 +115,7 @@ void addNodeHead(SinglyLinkedListHandle_t handle, const T *pData) {
 
 
 void addEmptyNodeTail(SinglyLinkedListHandle_t handle, Node* *pNewest) {
-    assert(pNewest != NULL);
+    assert(handle != NULL);
 
     *pNewest = (Node *)malloc(sizeof(Node));
 
@@ -125,8 +137,11 @@ void addEmptyNodeTail(SinglyLinkedListHandle_t handle, Node* *pNewest) {
 }
 
 void addNodeTail(SinglyLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    handle->addEmptyNodeTail(newest);
+    addEmptyNodeTail(newest);
     newest->data = *pData;
 
     ++handle->size;
@@ -134,6 +149,8 @@ void addNodeTail(SinglyLinkedListHandle_t handle, const T *pData) {
 
 
 void deleteNodeTail(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     // if list empty
     if (handle->head == NULL) return;
 
@@ -182,6 +199,8 @@ void deleteNodeTail(SinglyLinkedListHandle_t handle) {
 
 
 void deleteNodeHead(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
+
     // if list empty
     if (handle->capacity == 0) return;
 
@@ -204,22 +223,25 @@ void deleteNodeHead(SinglyLinkedListHandle_t handle) {
 }
 
 
-void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+void insertNode(SinglyLinkedList_t handle, const int *pIndex, const T *pData) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);
+    assert(pData != NULL);
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) handle->addNodeHead(pData); 
-    else if (*pIndex == handle->capacity) handle->addNodeTail(pData);
+    if (*pIndex == 0) addNodeHead(pData); 
+    else if (*pIndex == handle->capacity) addNodeTail(pData);
     else {
 
         // just need to find second to last to pIndex (because you can calculate current (*pIndex) by previous->next)
         // find previous pIndex and pIndex
-        previous = handle->getNode(*pIndex - 1);
-        current = previous->next; // current = handle->getNode(*pIndex);
-        handle->insertBetween(previous, current, pData);
+        previous = getNode(handle, *pIndex - 1);
+        current = previous->next; // current = getNode(handle, *pIndex);
+        insertBetween(previous, current, pData);
 
         // OR
         /*
@@ -231,7 +253,7 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
             previous = current;
             current = current->next;
         }
-        handle->insertBetween(previous, current, pData);
+        insertBetween(previous, current, pData);
         */
     }
     // OR
@@ -242,10 +264,10 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 
     while (current != NULL) {
         if (i == *pIndex) {
-            if (current == handle->head) handle->addNodeHead(pData);
-            else if (current == handle->tail) handle->addNodetail(pData);
+            if (current == handle->head) addNodeHead(pData);
+            else if (current == handle->tail) addNodetail(pData);
             else {
-                handle->insertBetween(previous, current, pData);
+                insertBetween(previous, current, pData);
             }
             return; // stop iterating
         }
@@ -260,7 +282,9 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 }
 
 
-void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
+void removeNode(SinglyLinkedList_t handle, const T *pIndex) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
@@ -268,20 +292,20 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) handle->deleteNodeHead(handle); // handle function checks if capacity is 0
-    else if (*pIndex == handle->capacity - 1) handle->deleteNodeTail(handle); // handle function checks if capacity is 0
+    if (*pIndex == 0) deleteNodeHead(handle); // handle function checks if capacity is 0
+    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle); // handle function checks if capacity is 0
     else {
         // erase current node
-        previous = handle->getNode(*pIndex - 1);
-        current = previous->next; // current = handle->getNode(*pIndex);
-        handle->removeBetween(previous, current->next);
+        previous = getNode(handle, *pIndex - 1);
+        current = previous->next; // current = getNode(handle, *pIndex);
+        removeBetween(previous, current->next);
 
         // OR
         /*
         // erase node between previous and next (erase current node)
-        previous = handle->getNode(*pIndex - 1);
-        next = (previous->next)->next;// next = current->next; // next = handle->getNode(*pIndex + 1); 
-        handle->removeBetween(previous, current->next);
+        previous = getNode(handle, *pIndex - 1);
+        next = (previous->next)->next;// next = current->next; // next = getNode(handle, *pIndex + 1); 
+        removeBetween(previous, current->next);
         */
     }
 
@@ -292,11 +316,11 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
     while (current != NULL) {
         
         if (i == *pIndex) {
-            if (current == handle->head) handle->deleteNodeHead(handle);
-            else if (current == handle->tail) handle->deleteNodeTail(handle);
+            if (current == handle->head) deleteNodeHead(handle);
+            else if (current == handle->tail) deleteNodeTail(handle);
             else {
                 // erase current node
-                handle->removeBetween(previous, current->next);
+                removeBetween(previous, current->next);
       
             }
             return; // stop iterating
@@ -314,7 +338,8 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
 
 
 void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
-
+    assert(handle != NULL);
+    assert(pData != NULL);
     Node *current = handle->head;
     Node *previous = NULL;
     int i = 0;
@@ -322,8 +347,8 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == handle->head) handle->deleteNodeHead(handle);
-            else if (current == handle->tail) handle->deleteNodeTail(handle);
+            if (current == handle->head) deleteNodeHead(handle);
+            else if (current == handle->tail) deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
@@ -335,7 +360,7 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
 
                 // OR
                 // erase current node
-                // handle->removeBetween(previous, current->next);
+                // removeBetween(previous, current->next);
 
             }
             // return; // dont stop iterating, remove all nodes with handle pData
@@ -351,6 +376,7 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
 
 
 void print(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
     // if list empty, avoid dereferencing NULL
     if (handle->head != NULL) {
         Node *current = handle->head;
@@ -364,34 +390,39 @@ void print(SinglyLinkedListHandle_t handle) {
 
 
 int getCapacity(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
     return handle->capacity;
 }
 
 
 int getSize(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
     return handle->size;
 }
 
 
 Node *getHead(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
     return handle->head;
 }
 
 
 Node *getTail(SinglyLinkedListHandle_t handle) {
+    assert(handle != NULL);
     return handle->tail;
 }
 
 
-Node *getNode(SinglyLinkedListHandle_t handle, const int *pIndex) {
+Node *getNode(SinglyLinkedList_t handle, const int *pIndex) {
     assert(handle != NULL);
+    assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
 
-    if (*pIndex == 0) return handle->getHead(handle);
-    else if (*pIndex == handle->capacity - 1) return handle->getTail(handle);
+    if (*pIndex == 0) return getHead(handle);
+    else if (*pIndex == handle->capacity - 1) return getTail(handle);
     else {
         current = handle->head;
         int i = 0;
@@ -406,29 +437,33 @@ Node *getNode(SinglyLinkedListHandle_t handle, const int *pIndex) {
 
 T getData(SinglyLinkedListHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
-    return handle->getNode(*pIndex)->data;
+    assert(pIndex != NULL);
+    return getNode(handle, *pIndex)->data;
 }
 
 void setData(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
     assert(handle != NULL);
-    handle->getNode(*pIndex)->data = *pData;
+    assert(pIndex != NULL);    
+    assert(pData != NULL);
+    getNode(handle,, *pIndex)->data = *pData;
 }
 
-void assign(SinglyLinkedListHandle_t handle, const T *array, const int &length) {
+void assign(SinglyLinkedListHandle_t handle, const T *array, const int *pLength) {
     assert(handle != NULL);
-    assert(array != NULL && length > 0);
+    assert(pLength != NULL);
+    assert(array != NULL && *pLength > 0);
 
     // resize
-    int sizeDifference = length - handle->capacity;
+    int sizeDifference = *pLength - handle->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            handle->addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
-            handle->deleteNodeTail(handle);
+            deleteNodeTail(handle);
         }
     }
 
@@ -443,7 +478,3 @@ void assign(SinglyLinkedListHandle_t handle, const T *array, const int &length) 
         current = current->next;
     }
 }
-
-
-
-#endif

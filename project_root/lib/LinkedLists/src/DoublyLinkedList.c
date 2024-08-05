@@ -1,39 +1,44 @@
-#ifndef DOUBLY_LINKED_LIST_H
-#define DOUBLY_LINKED_LIST_H
-
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "DoublyLinkedList.h"
+#include "node.h"
 
 
 
-
-void insertEmptyBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, Node* &newest) {
+void insertEmptyBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
+    assert(handle != NULL);  
     assert(left != NULL && right != NULL);
     assert(left->next == right && right->prev == left);
 
-    newest = (Node *)malloc(sizeof(Node));
+    *pNewest = (Node *)malloc(sizeof(Node));
     // join newest and right
-    newest->next = right;
-    right->prev = newest;
+    *pNewest->next = right;
+    right->prev = *pNewest;
     // join newest and left
     newest->prev = left;
-    left->next = newest;
+    left->next = *pNewest;
 
-    ++this->capacity;
+    ++handle->capacity;
 }
 
 
 void insertBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, const T *pData) {
+    assert(handle != NULL);  
+    assert(left != NULL && right != NULL);
+    assert(left->next == right && right->prev == left);
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    this->insertEmptyBetween(left, right, newest);
+    insertEmptyBetween(left, right, newest);
     newest->data = *pData;
 
-    ++this->size;
+    ++handle->size;
 }
 
 
 void removeBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right) {
+    assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next->next == right && right->prev->prev == left);
 
@@ -43,73 +48,77 @@ void removeBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right) {
     left->next = right;
     right->prev = left;
 
-    --this->size;
-    --this->capacity;
+    --handle->size;
+    --handle->capacity;
 }
 
 
-void addEmptyNodeHead(DoublyLinkedListHandle_t handle, Node* &newest) {
-   
-    newest = (Node *)malloc(sizeof(Node));
+void addEmptyNodeHead(DoublyLinkedListHandle_t handle, Node* *pNewest) {
+    assert(handle != NULL);  
+    *pNewest = (Node *)malloc(sizeof(Node));
 
     // if list empty
-    if (this->head == NULL) {
-        newest->next = this->head;
-        newest->prev = NULL;
+    if (handle->head == NULL) {
+        *pNewest->next = handle->head;
+        *pNewest->prev = NULL;
         // actualize head
-        this->head = newest;
+        handle->head = *pNewest;
     } 
     // not empty
     else {
         // join newest with head
-        newest->next = this->head;
-        this->head->prev = newest;
-        newest->prev = NULL;
+        *pNewest->next = handle->head;
+        handle->head->prev = *pNewest;
+        *pNewest->prev = NULL;
         // actualize head
-        this->head = newest;
+        handle->head = *pNewest;
     }
 
-    ++this->capacity;
+    ++handle->capacity;
 }
 
 
 void addNodeHead(DoublyLinkedListHandle_t handle, const T *pData) {
-   
+    assert(handle != NULL); 
+    assert(pData != NULL);
+
     Node *newest = NULL;
-    this->addEmptyNodeHead(newest);
+    addEmptyNodeHead(newest);
     newest->data = *pData;
 
-    ++this->size;
+    ++handle->size;
 }
 
 
-void addEmptyNodeTail(DoublyLinkedListHandle_t handle, Node* &newest) {
-
-    newest = (Node *)malloc(sizeof(Node));
+void addEmptyNodeTail(DoublyLinkedListHandle_t handle, Node* *pNewest) {
+    assert(handle != NULL);  
+    *pNewest = (Node *)malloc(sizeof(Node));
     
     // if list empty
-    if (this->tail == NULL) {
-        newest->next = NULL;
-        newest->prev = this->tail;
+    if (handle->tail == NULL) {
+        *pNewest->next = NULL;
+        *pNewest->prev = handle->tail;
         // actualize tail
-        this->tail = newest;
+        handle->tail = *pNewest;
     } 
     // not empty
     else {
-        newest->next = NULL;
+        *pNewest->next = NULL;
         // join newest and tail
-        newest->prev = this->tail;
-        this->tail->next = newest;
+        *pNewest->prev = handle->tail;
+        *pNewest->tail->next = *pNewest;
         // actualize tail
-        this->tail = newest;
+        handle->tail = *pNewest;
     }
 
-    ++this->capacity;
+    ++handle->capacity;
 }
 
 
 void addNodeTail(DoublyLinkedListHandle_t handle, const T *pData) {
-   
+    assert(handle != NULL);  
+    assert(pData != NULL);
+
     Node *newest = NULL;
     addEmptyNodeTail(newest);
     newest->data = *pData;
@@ -119,91 +128,98 @@ void addNodeTail(DoublyLinkedListHandle_t handle, const T *pData) {
 
 
 void deleteNodeTail(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
     // if list empty
-    if (this->head == NULL) return;
+    if (handle->head == NULL) return;
 
     // if list has 1 element
-    if (this->head == this->tail) {
-        delete this->head;
-        this->head = this->tail = NULL;
+    if (handle->head == handle->tail) {
+        delete handle->head;
+        handle->head = handle->tail = NULL;
         return;
     }
 
     // actualize tail
-    this->tail = this->tail->prev;
+    handle->tail = handle->tail->prev;
     // free memory
-    delete this->tail->next;
-    this->tail->next = NULL;
+    delete handle->tail->next;
+    handle->tail->next = NULL;
 
-    --this->capacity;
-    --this->size;
+    --handle->capacity;
+    --handle->size;
 }
 
 
 void deleteNodeHead(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
     // if list empty
-    if (this->capacity == 0) return;
+    if (handle->capacity == 0) return;
 
     // if list has 1 element
-    if (this->capacity == 1) {
-        delete this->head;
-        this->head = this->tail = NULL;
+    if (handle->capacity == 1) {
+        delete handle->head;
+        handle->head = handle->tail = NULL;
         return;
     }
 
     // actualize head
-    this->head = this->head->next;
+    handle->head = handle->head->next;
     // free memory
-    delete this->head->prev;
-    this->head->prev = NULL;
+    delete handle->head->prev;
+    handle->head->prev = NULL;
 
-    --this->capacity;
-    --this->size;
+    --handle->capacity;
+    --handle->size;
 }
 
 
 void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+    assert(handle != NULL);  
+    assert(pIndex != NULL);
+    assert(pData != NULL);
     // handle incorrect pIndex, wont have to worry later
     assert(*pIndex >= 0 && pIndex < capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) this->addNodeHead(pData); // this function checks if capacity is 0
-    else if (*pIndex == this->capacity - 1) this->addNodeTail(pData); // this function checks if capacity is 0
+    if (*pIndex == 0) addNodeHead(pData); // handle function checks if capacity is 0
+    else if (*pIndex == handle->capacity - 1) addNodeTail(pData); // handle function checks if capacity is 0
     else {
         // check if its faster to iterate from the front or the back, find pointers to node on pIndex and previous
-        if (*pIndex < this->capacity/2) {
-            current = this->head;
+        if (*pIndex < handle->capacity/2) {
+            current = handle->head;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->next;
             }
-            this->insertBetween(previous, current, pData);
+            insertBetween(previous, current, pData);
 
         } else {
-            current = this->tail;
+            current = handle->tail;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->prev;
             }
-            this->insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
+            insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
             // iterating backwards, the previous is on the right and current on the left !!!
         }
 
         // OR
         /* 
-        current = this->getNode(*pIndex);
-        previous = current->prev; // previous = this->getNode(*pIndex - 1);
-        this->insertBetween(previous, current, pData);
+        current = getNode(handle, *pIndex);
+        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        insertBetween(previous, current, pData);
         }
         */
 
         // OR
         /* 
-        previous = this->getNode(*pIndex - 1);
-        current = previous->next; // current = this->getNode(*pIndex);
-        this->insertBetween(previous, current, pData);
+        previous = getNode(handle, *pIndex - 1);
+        current = previous->next; // current = getNode(handle, *pIndex);
+        insertBetween(previous, current, pData);
         }
         */
     }
@@ -214,43 +230,45 @@ void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 
 
 void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
+    assert(handle != NULL);  
+    assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < this->capacity);
+    assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) this->deleteNodeHead(handle);    
-    else if (*pIndex == this->capacity - 1) this->deleteNodeTail(handle);
+    if (*pIndex == 0) deleteNodeHead(handle);    
+    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
     else {
         // erase current node
-        current = this->getNode(*pIndex);
-        previous = current->prev; // previous = this->getNode(*pIndex - 1);
-        this->removeBetween(previous, current->next);
+        current = getNode(handle, *pIndex);
+        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        removeBetween(previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
-        next = this->getNode(*pIndex + 1);
-        previous = (current->prev)->prev; // previous = this->getNode(*pIndex - 1);
-        this->removeBetween(previous, next);
+        next = getNode(handle, *pIndex + 1);
+        previous = (current->prev)->prev; // previous = getNode(handle, *pIndex - 1);
+        removeBetween(previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
-        previous = this->getNode(*pIndex - 1);
-        next = (previous->next)->next;// next = this->getNode(*pIndex + 1); 
-        this->removeBetween(previous, next);
+        previous = getNode(handle, *pIndex - 1);
+        next = (previous->next)->next;// next = getNode(handle, *pIndex + 1); 
+        removeBetween(previous, next);
         */
 
        // OR
        // erase current node 
        /*
-       if (*pIndex < this->capacity/2) {
+       if (*pIndex < handle->capacity/2) {
             // find previous and next
-            current = this->head;
+            current = handle->head;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->next;
@@ -264,7 +282,7 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
 
         } else {
             // NOTE that here previous is on the right, next on the left, because of iterating backwards!
-            current = this->tail;
+            current = handle->tail;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->prev;
@@ -280,9 +298,9 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
        
         // OR
         // erase current node but swap previous and next when iterating backward and use same formula
-        if (*pIndex < this->capacity/2) {
+        if (*pIndex < handle->capacity/2) {
             // find previous and next
-            current = this->head;
+            current = handle->head;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->next;
@@ -291,7 +309,7 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
             
         } else {
             // find previous and next
-            current = this->tail;
+            current = handle->tail;
             for (int i = 0; i < *pIndex; ++i) {
                 previous = current;
                 current = current->prev;
@@ -303,7 +321,7 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
             previous = tmp;
         }          
 
-        this->removeBetween(previous, next);
+        removeBetween(previous, next);
     }
 
     current = NULL;
@@ -313,15 +331,17 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
 
 
 void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData) {
+    assert(handle != NULL);  
+    assert(pData != NULL);
 
-    Node *current = this->head;
+    Node *current = handle->head;
     Node *previous = NULL;
 
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == head) this->deleteNodeHead(handle);
-            else if (current == tail) this->deleteNodeTail(handle);
+            if (current == head) deleteNodeHead(handle);
+            else if (current == tail) deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
@@ -332,9 +352,9 @@ void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData) {
 
                 // OR
                 // erase current node
-                this->removeBetween(previous, current->next);
+                removeBetween(previous, current->next);
             }
-            // return; // dont stop iterating, remove all nodes with this pData
+            // return; // dont stop iterating, remove all nodes with handle pData
         }
 
         previous = current;
@@ -346,11 +366,13 @@ void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void print(DoublyLinkedListHandle_t handle) const {
+void print(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
     // if list empty then dont dereference NULLs!
-    if (this->head != NULL) {
-        Node *current = this->head;
-        for (int i = 0; i < this->capacity; ++i) {
+    if (handle->head != NULL) {
+        Node *current = handle->head;
+        for (int i = 0; i < handle->capacity; ++i) {
             printf(NULL, current->data);
             current = current->next;
         }
@@ -359,46 +381,56 @@ void print(DoublyLinkedListHandle_t handle) const {
 }
 
 
-int getCapacity(DoublyLinkedListHandle_t handle) const {
-    return this->capacity;
+int getCapacity(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
+    return handle->capacity;
 }
 
 
-int getSize(handle) const {
-    return this->size;
+int getSize(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
+    return handle->size;
 }
 
 
-Node *getHead(DoublyLinkedListHandle_t handle) const {
-    return this->head;
+Node *getHead(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
+    return handle->head;
 }
 
 
-Node *getTail(DoublyLinkedListHandle_t handle) const {
-    return this->tail;
+Node *getTail(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);  
+
+    return handle->tail;
 }
 
 
-Node *getNode(DoublyLinkedListHandle_t handle, const int *pIndex) const {
+Node *getNode(DoublyLinkedListHandle_t handle, const int *pIndex) {
+    assert(handle != NULL);
+    assert(pIndex != NULL);    
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < this->capacity);
+    assert(*pIndex >= 0 && pIndex < handle->capacity);
 
     Node *current = NULL;
 
-    if (*pIndex == 0) return this->getHead(handle);
-    else if (*pIndex == this->capacity - 1) return this->getTail(handle);
+    if (*pIndex == 0) return getHead(handle);
+    else if (*pIndex == handle->capacity - 1) return getTail(handle);
     else {
         // check if its faster to iterate from the back or the front
-        if (*pIndex < this->capacity/2) {
+        if (*pIndex < handle->capacity/2) {
             // start from the head
-            current = this->head;
+            current = handle->head;
             for (int i = 0; i < *pIndex; ++i) {
                 // go forward
                 current = current->next;
             }
         } else {
             // start from tail
-            current = this->tail;
+            current = handle->tail;
             for (int i = 0; i < *pIndex; ++i) {
                 // go backward
                 current = current->prev;
@@ -409,43 +441,50 @@ Node *getNode(DoublyLinkedListHandle_t handle, const int *pIndex) const {
 }
 
 
-T getData(DoublyLinkedListHandle_t handle, const int *pIndex) const {
-    return this->getNode(*pIndex)->data;
+T getData(DoublyLinkedListHandle_t handle, const int *pIndex) {  
+    assert(handle != NULL);  
+    assert(pIndex != NULL);
+
+    return getNode(handle, *pIndex)->data;
 }
 
 
-void setData(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
-    this->getNode(*pIndex)->data = *pData;
+void setData(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData) {  
+    assert(handle != NULL);  
+    assert(pIndex != NULL);
+    assert(pData != NULL);
+
+    getNode(handle, *pIndex)->data = *pData;
 }
 
 
-void assign(DoublyLinkedListHandle_t handle, const T *array, const int &length) {
+void assign(DoublyLinkedListHandle_t handle, const T *array, const int *pLength) {
+    assert(pLength != NULL);    
+    assert(handle != NULL);
     assert(array != NULL && length > 0);
 
     // resize
-    int sizeDifference = length - this->capacity;
+    int sizeDifference = *pLength - handle->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            this->addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
-            this->deleteNodeTail(handle);
+            deleteNodeTail(handle);
         }
     }
 
-    /* this has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
+    /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
     /* for (i = 0; i < capacity; ++i) {
-        this->setData(i, array[i]);
+        handle->setData(i, array[i]);
     } 
     */
-    Node *current = this->head;
-    for (i = 0; i < this->capacity; ++i) {
+    Node *current = handle->head;
+    for (i = 0; i < handle->capacity; ++i) {
         current->data = array[i];
         current = current->next;
     }
 }
-
-#endif
