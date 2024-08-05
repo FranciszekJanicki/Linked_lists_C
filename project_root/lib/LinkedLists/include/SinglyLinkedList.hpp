@@ -1,4 +1,54 @@
-#include "SinglyLinkedList.h"
+#ifndef SINGLY_LINKED_LIST_H
+#define SINGLY_LINKED_LIST_H
+
+#include <stdio.h>
+#include <cassert>
+#include "../private_include/node.h"
+
+// template <class T>
+// struct Node {
+//     Node<T> *next = nullptr;
+//     T data;
+// };
+
+template <class T>
+class SinglyLinkedList {
+    private:
+        Node<T> *head = nullptr;
+        Node<T> *tail = nullptr;
+        int capacity = 0;
+        int size = 0;
+
+        /* private methods as they do not have exception handling and should be run only inside other methods that do have it*/
+        void insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest);
+        void insertBetween(Node<T> *left, Node<T> *right, const T &data);
+        void removeBetween(Node<T> *left, Node<T> *right);
+        void addEmptyNodeTail(Node<T>* &newest);
+        void addEmptyNodeHead(Node<T>* &newest);
+
+    public:
+        SinglyLinkedList();
+        ~SinglyLinkedList();
+
+        void addNodeHead(const T &data);
+        void addNodeTail(const T &data);
+        void deleteNodeTail();
+        void deleteNodeHead();
+        void insertNode(const int &index, const T &data);
+        void removeNode(const T &index);
+        void removeNodeElement(const T &data);
+        void print() const;
+        int getCapacity() const;
+        int getSize() const;
+        Node<T> *getHead() const;
+        Node<T> *getTail() const;
+        Node<T> *getNode(const int &index) const;
+        T getData(const int &index) const;
+        void setData(const int &index, const T &data);
+        void assign(const T *array, const int &length);
+};
+
+
 
 template <class T>
 SinglyLinkedList<T>::SinglyLinkedList() {
@@ -412,3 +462,7 @@ void SinglyLinkedList<T>::assign(const T *array, const int &length) {
         current = current->next;
     }
 }
+
+
+
+#endif

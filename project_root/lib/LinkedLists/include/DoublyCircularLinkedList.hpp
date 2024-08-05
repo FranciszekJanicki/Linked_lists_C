@@ -1,12 +1,62 @@
-#include "DoublyLinkedList.h"
+#ifndef DOUBLY_CIRCULAR_LINKED_LIST_H
+#define DOUBLY_CIRCULAR_LINKED_LIST_H
+
+#include <stdio.h>
+#include <cassert>
+#include "../private_include/node.h"
+
+// template <typename T>
+// struct Node {
+//     Node<T> *next = nullptr;
+//     Node<T> *prev = nullptr;
+//     T data;
+// };
 
 template <class T>
-DoublyLinkedList<T>::DoublyLinkedList() {
+class DoublyCircularLinkedList {
+    private:
+        Node<T> *head = nullptr;
+        Node<T> *tail = nullptr;
+        int capacity = 0;
+        int size = 0;
+
+        /* private methods as they do not have exception handling and should be run only inside other methods that do have it*/
+        void insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest);
+        void insertBetween(Node<T> *left, Node<T> *right, const T &data);
+        void removeBetween(Node<T> *left, Node<T> *right);
+        void addEmptyNodeTail(Node<T>* &newest);
+        void addEmptyNodeHead(Node<T>* &newest);
+
+    public:
+        DoublyCircularLinkedList();
+        ~DoublyCircularLinkedList();
+
+        void addNodeHead(const T &data);
+        void addNodeTail(const T &data);
+        void deleteNodeTail();
+        void deleteNodeHead();
+        void insertNode(const int &index, const T &data);
+        void removeNode(const T &index);
+        void removeNodeElement(const T &data);
+        void print() const;
+        int getCapacity() const;
+        int getSize() const;
+        Node<T> *getHead() const;
+        Node<T> *getTail() const;
+        Node<T> *getNode(const int &index) const;
+        T getData(const int &index) const;
+        void setData(const int &index, const T &data);
+        void assign(const T *array, const int &length);
+};
+
+
+template <class T>
+DoublyCircularLinkedList<T>::DoublyCircularLinkedList() {
 
 }
 
 template <class T>
-DoublyLinkedList<T>::~DoublyLinkedList() {
+DoublyCircularLinkedList<T>::~DoublyCircularLinkedList() {
 
     for (int i = 0; i < capacity; ++i) {
         this->deleteNodeHead();
@@ -30,7 +80,7 @@ DoublyLinkedList<T>::~DoublyLinkedList() {
 }
 
 template <class T>
-void DoublyLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest) {
+void DoublyCircularLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest) {
     assert(left != nullptr && right != nullptr);
     assert(left->next == right && right->prev == left);
 
@@ -46,16 +96,16 @@ void DoublyLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node
 }
 
 template <class T>
-void DoublyLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
+void DoublyCircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
     Node<T> *newest = nullptr;
     this->insertEmptyBetween(left, right, newest);
     newest->data = data;
-
+    
     ++this->size;
 }
 
 template <class T>
-void DoublyLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
+void DoublyCircularLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
     assert(left != nullptr && right != nullptr);
     assert(left->next->next == right && right->prev->prev == left);
 
@@ -70,23 +120,25 @@ void DoublyLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
+void DoublyCircularLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
    
     newest = new Node<T>();
 
     // if list empty
     if (this->head == nullptr) {
+        // join newest with head and tail and actualize
         newest->next = this->head;
-        newest->prev = nullptr;
-        // actualize head
-        this->head = newest;
+        newest->prev = this->tail;
+        this->head = this->tail = newest;
     } 
     // not empty
     else {
-        // join newest with head
+        // join newest and head
         newest->next = this->head;
         this->head->prev = newest;
-        newest->prev = nullptr;
+        // join newest ant tail
+        newest->prev = this->tail;
+        this->tail->next = newest;
         // actualize head
         this->head = newest;
     }
@@ -95,7 +147,7 @@ void DoublyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::addNodeHead(const T &data) {
+void DoublyCircularLinkedList<T>::addNodeHead(const T &data) {
    
     Node<T> *newest = nullptr;
     this->addEmptyNodeHead(newest);
@@ -105,42 +157,43 @@ void DoublyLinkedList<T>::addNodeHead(const T &data) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+void DoublyCircularLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
 
     newest = new Node<T>();
     
     // if list empty
     if (this->tail == nullptr) {
-        newest->next = nullptr;
+        // join newest with head and tail and actualize
+        newest->next = this->head;
         newest->prev = this->tail;
-        // actualize tail
-        this->tail = newest;
+        this->tail = this->head = newest;
     } 
     // not empty
     else {
-        newest->next = nullptr;
+        // join newest and head
+        newest->next = this->head;
+        this->head->prev = newest;
         // join newest and tail
         newest->prev = this->tail;
         this->tail->next = newest;
         // actualize tail
-        this->tail = newest;
+        this->tail = newest;  
     }
 
     ++this->capacity;
 }
 
 template <class T>
-void DoublyLinkedList<T>::addNodeTail(const T &data) {
+void DoublyCircularLinkedList<T>::addNodeTail(const T &data) {
    
     Node<T> *newest = nullptr;
-    addEmptyNodeTail(newest);
+    this->addEmptyNodeTail(newest);
     newest->data = data;
 
-    ++size;
+    ++this->size;
 }
-
 template <class T>
-void DoublyLinkedList<T>::deleteNodeTail() {
+void DoublyCircularLinkedList<T>::deleteNodeTail() {
     // if list empty
     if (this->head == nullptr) return;
 
@@ -151,24 +204,28 @@ void DoublyLinkedList<T>::deleteNodeTail() {
         return;
     }
 
+    // with doubly list you dont need to iterate to find second to last, because you have tail->prev
+    // dont need to use temp, because you can use tail->next after changing tail addres to release deleted node
     // actualize tail
     this->tail = this->tail->prev;
     // free memory
-    delete this->tail->next;
-    this->tail->next = nullptr;
+    delete tail->next;
+    // join head and tail
+    this->tail->next = this->head;
+    this->head->prev = this->tail;
 
     --this->capacity;
     --this->size;
 }
 
 template <class T>
-void DoublyLinkedList<T>::deleteNodeHead() {
+void DoublyCircularLinkedList<T>::deleteNodeHead() {
     // if list empty
     if (this->capacity == 0) return;
 
     // if list has 1 element
     if (this->capacity == 1) {
-        delete this->head;
+        delete head;
         this->head = this->tail = nullptr;
         return;
     }
@@ -177,16 +234,18 @@ void DoublyLinkedList<T>::deleteNodeHead() {
     this->head = this->head->next;
     // free memory
     delete this->head->prev;
-    this->head->prev = nullptr;
+    // join head and tail
+    this->head->prev = this->tail;
+    this->tail->next = this->head;
 
     --this->capacity;
     --this->size;
 }
 
 template <class T>
-void DoublyLinkedList<T>::insertNode(const int &index, const T &data) {
+void DoublyCircularLinkedList<T>::insertNode(const int &index, const T &data) {
     // handle incorrect index, wont have to worry later
-    assert(index >= 0 && index < capacity);
+    assert(index >= 0 && index < this->capacity);
 
     Node<T> *current = nullptr;
     Node<T> *previous = nullptr;
@@ -235,7 +294,7 @@ void DoublyLinkedList<T>::insertNode(const int &index, const T &data) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::removeNode(const T &index) {
+void DoublyCircularLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
     assert(index >= 0 && index < this->capacity);
 
@@ -302,30 +361,30 @@ void DoublyLinkedList<T>::removeNode(const T &index) {
        
         // OR
         // erase current node but swap previous and next when iterating backward and use same formula
-        if (index < this->capacity/2) {
-            // find previous and next
-            current = this->head;
-            for (int i = 0; i < index; ++i) {
-                previous = current;
-                current = current->next;
-            }
-            next = current->next;
+        // if (index < this->capacity/2) {
+        //     // find previous and next
+        //     current = this->head;
+        //     for (int i = 0; i < index; ++i) {
+        //         previous = current;
+        //         current = current->next;
+        //     }
+        //     next = current->next;
             
-        } else {
-            // find previous and next
-            current = this->tail;
-            for (int i = 0; i < index; ++i) {
-                previous = current;
-                current = current->prev;
-            }
-            next = current->prev;
-            // swap
-            Node<T> *tmp = next;
-            next = previous;
-            previous = tmp;
-        }          
+        // } else {
+        //     // find previous and next
+        //     current = tail;
+        //     for (int i = 0; i < index; ++i) {
+        //         previous = current;
+        //         current = current->prev;
+        //     }
+        //     next = current->prev;
+        //     // swap
+        //     Node<T> *tmp = next;
+        //     next = previous;
+        //     previous = tmp;
+        // }          
 
-        this->removeBetween(previous, next);
+        // this->removeBetween(previous, next);
     }
 
     current = nullptr;
@@ -334,7 +393,7 @@ void DoublyLinkedList<T>::removeNode(const T &index) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::removeNodeElement(const T &data) {
+void DoublyCircularLinkedList<T>::removeNodeElement(const T &data) {
 
     Node<T> *current = this->head;
     Node<T> *previous = nullptr;
@@ -342,8 +401,8 @@ void DoublyLinkedList<T>::removeNodeElement(const T &data) {
     while (current != nullptr) {
         
         if (current->data == data) {
-            if (current == head) this->deleteNodeHead();
-            else if (current == tail) this->deleteNodeTail();
+            if (current == this->head) this->deleteNodeHead();
+            else if (current == this->tail) this->deleteNodeTail();
             else {
                 // erase current node
                 // join previous and next to current
@@ -368,7 +427,7 @@ void DoublyLinkedList<T>::removeNodeElement(const T &data) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::print() const {
+void DoublyCircularLinkedList<T>::print() const {
     // if list empty then dont dereference nullptrs!
     if (this->head != nullptr) {
         Node<T> *current = this->head;
@@ -381,27 +440,27 @@ void DoublyLinkedList<T>::print() const {
 }
 
 template <class T>
-int DoublyLinkedList<T>::getCapacity() const {
+int DoublyCircularLinkedList<T>::getCapacity() const {
     return this->capacity;
 }
 
 template <class T>
-int DoublyLinkedList<T>::getSize() const {
+int DoublyCircularLinkedList<T>::getSize() const {
     return this->size;
 }
 
 template <class T>
-Node<T> *DoublyLinkedList<T>::getHead() const {
+Node<T> *DoublyCircularLinkedList<T>::getHead() const {
     return this->head;
 }
 
 template <class T>
-Node<T> *DoublyLinkedList<T>::getTail() const {
+Node<T> *DoublyCircularLinkedList<T>::getTail() const {
     return this->tail;
 }
 
 template <class T>
-Node<T> *DoublyLinkedList<T>::getNode(const int &index) const {
+Node<T> *DoublyCircularLinkedList<T>::getNode(const int &index) const {
     // handle incorrect index, wont have to worry later
     assert(index >= 0 && index < this->capacity);
 
@@ -431,17 +490,18 @@ Node<T> *DoublyLinkedList<T>::getNode(const int &index) const {
 }
 
 template <class T>
-T DoublyLinkedList<T>::getData(const int &index) const {
+T DoublyCircularLinkedList<T>::getData(const int &index) const {
     return this->getNode(index)->data;
 }
 
 template <class T>
-void DoublyLinkedList<T>::setData(const int &index, const T &data) {
+void DoublyCircularLinkedList<T>::setData(const int &index, const T &data) {
     this->getNode(index)->data = data;
 }
 
+
 template <class T>
-void DoublyLinkedList<T>::assign(const T *array, const int &length) {
+void DoublyCircularLinkedList<T>::assign(const T *array, const int &length) {
     assert(array != nullptr && length > 0);
 
     // resize
@@ -469,3 +529,6 @@ void DoublyLinkedList<T>::assign(const T *array, const int &length) {
         current = current->next;
     }
 }
+
+
+#endif

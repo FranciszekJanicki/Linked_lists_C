@@ -1,18 +1,18 @@
-#ifndef SINGLY_LINKED_LIST_H
-#define SINGLY_LINKED_LIST_H
+#ifndef CIRCULAR_LINKED_LIST_H
+#define CIRCULAR_LINKED_LIST_H
 
 #include <stdio.h>
 #include <cassert>
+#include "../private_include/node.h"
 
-
-template <typename T>
-struct Node {
-    Node *next = nullptr;
-    T data;
-};
+// template <typename T>
+// struct Node {
+//     Node<T> *next = nullptr;
+//     T data;
+// };
 
 template <class T>
-class SinglyLinkedList {
+class CircularLinkedList {
     private:
         Node<T> *head = nullptr;
         Node<T> *tail = nullptr;
@@ -27,8 +27,8 @@ class SinglyLinkedList {
         void addEmptyNodeHead(Node<T>* &newest);
 
     public:
-        SinglyLinkedList();
-        ~SinglyLinkedList();
+        CircularLinkedList();
+        ~CircularLinkedList();
 
         void addNodeHead(const T &data);
         void addNodeTail(const T &data);
@@ -51,12 +51,12 @@ class SinglyLinkedList {
 
 
 template <class T>
-SinglyLinkedList<T>::SinglyLinkedList() {
+CircularLinkedList<T>::CircularLinkedList() {
 
 }
 
 template <class T>
-SinglyLinkedList<T>::~SinglyLinkedList() {
+CircularLinkedList<T>::~CircularLinkedList() {
 
     for (int i = 0; i < capacity; ++i) {
         this->deleteNodeHead();
@@ -67,7 +67,7 @@ SinglyLinkedList<T>::~SinglyLinkedList() {
 }
 
 template <class T>
-void SinglyLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest) {
+void CircularLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node<T>* &newest) {
     assert(left != nullptr && right != nullptr);
     assert(left->next == right);
 
@@ -75,11 +75,11 @@ void SinglyLinkedList<T>::insertEmptyBetween(Node<T> *left, Node<T> *right, Node
     newest->next = right;
     left->next = newest;
 
-    ++this->capacity;
+    ++capacity;
 }
 
 template <class T>
-void SinglyLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
+void CircularLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &data) {
     Node<T> *newest = nullptr;
     this->insertEmptyBetween(left, right, newest);
     newest->data = data;
@@ -88,7 +88,7 @@ void SinglyLinkedList<T>::insertBetween(Node<T> *left, Node<T> *right, const T &
 }
 
 template <class T>
-void SinglyLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
+void CircularLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
     assert(left != nullptr && right != nullptr);
     assert(left->next->next == right);
 
@@ -96,24 +96,35 @@ void SinglyLinkedList<T>::removeBetween(Node<T> *left, Node<T> *right) {
     delete left->next;
     // join left and right
     left->next = right;
-    
+
     --this->size;
     --this->capacity;
 }
 
 template <class T>
-void SinglyLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
-    // in single list dont have to check if list is empty or not for head insertion
+void CircularLinkedList<T>::addEmptyNodeHead(Node<T>* &newest) {
+
     newest = new Node<T>();
-    newest->next = this->head;
-    // actualize head
-    this->head = newest;
+
+    // if list empty
+    if (this->head == nullptr) {
+        newest->next = this->head;
+        // actualize head and tail
+        this->head = this->tail = newest;
+    }
+    // not empty
+    else {
+        newest->next = this->head;
+        // actualize head
+        this->head = newest;
+        this->tail->next = this->head;
+    }
 
     ++this->capacity;
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeHead(const T &data) {
+void CircularLinkedList<T>::addNodeHead(const T &data) {
 
     Node<T> *newest = nullptr;
     this->addEmptyNodeHead(newest);
@@ -123,18 +134,19 @@ void SinglyLinkedList<T>::addNodeHead(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+void CircularLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
+
     newest = new Node<T>();
 
     // if list empty
     if (this->tail == nullptr) {        
-        newest->next = nullptr;
-        // actualize tail
-        this->tail = newest;
+        newest->next = this->head;
+        // actualize head and tail
+        this->head = this->tail = newest;
     } 
     // not empty
     else {
-        newest->next = nullptr;
+        newest->next = this->head;
         this->tail->next = newest;
         // actualize tail
         this->tail = newest;
@@ -144,7 +156,8 @@ void SinglyLinkedList<T>::addEmptyNodeTail(Node<T>* &newest) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::addNodeTail(const T &data) {
+void CircularLinkedList<T>::addNodeTail(const T &data) {
+
     Node<T> *newest = nullptr;
     this->addEmptyNodeTail(newest);
     newest->data = data;
@@ -153,7 +166,7 @@ void SinglyLinkedList<T>::addNodeTail(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::deleteNodeTail() {
+void CircularLinkedList<T>::deleteNodeTail() {
     // if list empty
     if (this->head == nullptr) return;
 
@@ -171,19 +184,9 @@ void SinglyLinkedList<T>::deleteNodeTail() {
     }
     // OR
     /*
-    // if list empty
-    if (capacity == 0) return;
-
-    // if list has 1 element
-    if (capacity == 1) {
-        delete head;
-        head = tail = nullptr;
-        return;
-    }
-
     // find second to last 
-    Node<T> *current = head;
-    for (int i = 0; i < capacity - 1; ++i) {
+    Node<T> *current = this->head;
+    for (int i = 0; i < this->capacity - 1; ++i) {
         current = current->next;
     }
     */
@@ -191,17 +194,15 @@ void SinglyLinkedList<T>::deleteNodeTail() {
     this->tail = current;
     // free memory
     delete this->tail->next;
-    // actualize tail edge
-    this->tail->next = nullptr;
+    this->tail->next = this->head;
 
     current = nullptr;
-
     --this->capacity;
     --this->size;
 }
 
 template <class T>
-void SinglyLinkedList<T>::deleteNodeHead() {
+void CircularLinkedList<T>::deleteNodeHead() {
     // if list empty
     if (this->capacity == 0) return;
 
@@ -215,16 +216,18 @@ void SinglyLinkedList<T>::deleteNodeHead() {
     Node<T> *temp = this->head;
     // actualize head
     this->head = this->head->next;
+    this->tail->next = this->head;
     // free memory
     delete temp;
-    temp = nullptr;
 
+    temp = nullptr;
     --this->capacity;
     --this->size;
 }
 
+
 template <class T>
-void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
+void CircularLinkedList<T>::insertNode(const int &index, const T &data) {
     // handle incorrect index, wont have to worry later
     assert(index >= 0 && index < this->capacity);
 
@@ -257,7 +260,7 @@ void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
     // OR
     /* 
     int i = 0;
-    current = head;
+    current = this->head;
     previous = nullptr;
 
     while (current != nullptr) {
@@ -280,7 +283,7 @@ void SinglyLinkedList<T>::insertNode(const int &index, const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::removeNode(const T &index) {
+void CircularLinkedList<T>::removeNode(const T &index) {
     // handle incorrect index, wont have to worry later
     assert(index >= 0 && index < this->capacity);
 
@@ -289,7 +292,7 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
     Node<T> *next = nullptr;
 
     if (index == 0) this->deleteNodeHead(); // this function checks if capacity is 0
-    else if (index == this->capacity - 1) this->deleteNodeTail(); // this function checks if capacity is 0
+    else if (index == this->capacity) this->deleteNodeTail(); // this function checks if capacity is 0
     else {
         // erase current node
         previous = this->getNode(index - 1);
@@ -333,7 +336,7 @@ void SinglyLinkedList<T>::removeNode(const T &index) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::removeNodeElement(const T &data) {
+void CircularLinkedList<T>::removeNodeElement(const T &data) {
 
     Node<T> *current = this->head;
     Node<T> *previous = nullptr;
@@ -370,7 +373,7 @@ void SinglyLinkedList<T>::removeNodeElement(const T &data) {
 }
 
 template <class T>
-void SinglyLinkedList<T>::print() const {
+void CircularLinkedList<T>::print() const {
     // if list empty, avoid dereferencing nullptr
     if (this->head != nullptr) {
         Node<T> *current = this->head;
@@ -383,27 +386,27 @@ void SinglyLinkedList<T>::print() const {
 }
 
 template <class T>
-int SinglyLinkedList<T>::getCapacity() const {
+int CircularLinkedList<T>::getCapacity() const {
     return this->capacity;
 }
 
 template <class T>
-int SinglyLinkedList<T>::getSize() const {
+int CircularLinkedList<T>::getSize() const {
     return this->size;
 }
 
 template <class T>
-Node<T> *SinglyLinkedList<T>::getHead() const {
-    return const_cast<Node<T> *>(this->head);
+Node<T> *CircularLinkedList<T>::getHead() const {
+    return this->head;
 }
 
 template <class T>
-Node<T> *SinglyLinkedList<T>::getTail() const {
-    return const_cast<Node<T> *>(this->tail);
+Node<T> *CircularLinkedList<T>::getTail() const {
+    return this->tail;
 }
 
 template <class T>
-Node<T> *SinglyLinkedList<T>::getNode(const int &index) const {
+Node<T> *CircularLinkedList<T>::getNode(const int &index) const {
     // handle incorrect index, wont have to worry later
     assert(index >= 0 && index < this->capacity);
 
@@ -419,22 +422,22 @@ Node<T> *SinglyLinkedList<T>::getNode(const int &index) const {
             current = current->next;
             ++i;
         }
-        return const_cast<Node<T> *>(current);
+        return current;
     }
 }
 
 template <class T>
-T SinglyLinkedList<T>::getData(const int &index) const {
+T CircularLinkedList<T>::getData(const int &index) const {
     return this->getNode(index)->data;
 }
 
 template <class T>
-void  SinglyLinkedList<T>::setData(const int &index, const T &data) {
+void CircularLinkedList<T>::setData(const int &index, const T &data) {
     this->getNode(index)->data = data;
 }
 
 template <class T>
-void SinglyLinkedList<T>::assign(const T *array, const int &length) {
+void CircularLinkedList<T>::assign(const T *array, const int &length) {
     assert(array != nullptr && length > 0);
 
     // resize
@@ -452,7 +455,7 @@ void SinglyLinkedList<T>::assign(const T *array, const int &length) {
     }
 
     /* this has shitty complexity as every iteration will call getNode function, which iterates to the index*/
-    /* for (i = 0; i < this->capacity; ++i) {
+    /* for (i = 0; i < capacity; ++i) {
         this->setData(i, array[i]);
     } 
     */
@@ -462,7 +465,6 @@ void SinglyLinkedList<T>::assign(const T *array, const int &length) {
         current = current->next;
     }
 }
-
 
 
 #endif
