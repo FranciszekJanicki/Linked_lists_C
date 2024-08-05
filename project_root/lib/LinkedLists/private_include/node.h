@@ -4,8 +4,8 @@
 typedef int T;
 
 typedef struct Node {
-    Node *next;
-    Node *prev;
+    struct Node *next;
+    struct Node *prev;
     T data;
 } Node;
 

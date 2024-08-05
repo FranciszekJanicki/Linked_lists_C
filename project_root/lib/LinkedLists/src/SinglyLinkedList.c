@@ -4,17 +4,20 @@
 #include <stdlib.h>
 #include "node.h"
 
+/* return handle to dynamic memory */
 SinglyLinkedListHandle_t listCreateDynamic() {
     SinglyLinkedListHandle_t handle = (SinglyLinkedListHandle_t)malloc(sizeof(SinglyLinkedList));
     assert(handle != NULL);
     return handle;
 }
 
+/* return static memory (necessary to copy it!) */
 SinglyLinkedList listCreateStatic() {
     SinglyLinkedList list;
     return list;
 }
 
+/* change what passed handle is pointing at */
 void listCreateDynamicVoid(SinglyLinkedListHandle_t *pHandle) {
     // assert that passed ptr to handle isnt NULL
     assert(pHandle != NULL);
@@ -25,11 +28,11 @@ void listCreateDynamicVoid(SinglyLinkedListHandle_t *pHandle) {
     assert(*pHandle != NULL);
 }
 
-void listCreateStaticVoid(SinglyLinkedListHandle_t handle, ListConfig_t config) {
-    assert(handle != NULL);
-    // do something with handle
-    handle->size = config.size;
-    handle->capacity = config.capacity;
+/* create stat */
+void listCreateStaticVoid(SinglyLinkedListHandle_t handle) {
+    SinglyLinkedList list;
+    *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
+    // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!!
 }
 
 void listDelete(SinglyLinkedListHandle_t handle) {
