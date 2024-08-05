@@ -1,13 +1,19 @@
 #ifndef NODE_H
 #define NODE_H
 
+typedef int T;
 
-template <typename T>
-struct Node {
-    Node<T> *next = nullptr;
-    Node<T> *prev = nullptr;
+typedef struct {
+    Node *next;
+    Node *prev;
     T data;
-};
+} Node;
+
+
+typedef struct {
+    int capacity;
+    int size;
+} ListConfig_t;
 
 
 #endif // NODE_H
