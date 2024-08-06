@@ -9,11 +9,6 @@ typedef struct Node {
     T data;
 } Node;
 
-
-typedef struct {
-    int capacity;
-    int size;
-} ListConfig_t;
-
+// typedef Node* Node;
 
 #endif // NODE_H

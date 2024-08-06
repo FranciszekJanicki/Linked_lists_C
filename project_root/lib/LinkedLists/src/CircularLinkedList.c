@@ -1,8 +1,65 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "CircularLinkedListHandle_t.h"
+#include "CircularLinkedList.h"
 #include "node.h"
+
+
+/* return handle to dynamically allocated memory */
+CircularLinkedListHandle_t listCreateDynamically() {
+    CircularLinkedListHandle_t handle = (CircularLinkedListHandle_t)malloc(sizeof(CircularLinkedList));
+    assert(handle != NULL);
+    return handle;
+}
+
+/* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
+CircularLinkedList listCreateStatically() {
+    CircularLinkedList list
+    return list;
+}
+
+/* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
+CircularLinkedListHandle_t listCreateStaticStatically() {
+    static CircularLinkedList list;
+    CircularLinkedListHandle_t handle = &list;
+    return handle;
+}
+
+/* dynamically allocate memory and point passed handle at it */
+void listCreateDynamicallyVoid(CircularLinkedListHandle_t *pHandle) {
+    // assert that passed ptr to handle isnt NULL
+    assert(pHandle != NULL);
+
+    // allocate memory and point handle at it
+    *pHandle = (CircularLinkedListHandle_t)malloc(sizeof(CircularLinkedList)); 
+    // check if allocation succeded
+    assert(*pHandle != NULL);
+}
+
+/* statically allocate memory and copy it to memory under passed handle */
+void listCreateStaticallyVoid(CircularLinkedListHandle_t handle) {
+    CircularLinkedList list;
+    *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
+    // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!! APART FROM THAT 'handle' is a copy, to work on original handle would need *pHandle like above
+}
+
+/* if wanting to also free the handle pointer itself, would need to pass pointer to it, not just the copy */
+void listDelete(CircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+    // Node* current = handle->head;
+    // for (int i = 0; i < handle->capacity; ++i) {
+    //     free(current);
+    //     current = current->next;
+    // }
+    for (int i = 0; i < handle->capacity; ++i) {
+            deleteNodeHead(handle);
+    }
+
+    if (handle->head != NULL) free(handle->head);
+    if (handle->tail != NULL) free(handle->tail);
+
+    free(handle);
+}
 
 void insertEmptyBetween(CircularLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
     assert(handle != NULL);
@@ -37,7 +94,7 @@ void removeBetween(CircularLinkedListHandle_t handle, Node *left, Node *right) {
     assert(left->next->next == right);
 
     // free memory
-    delete left->next;
+    free(left->next);
     // join left and right
     left->next = right;
 
@@ -124,7 +181,7 @@ void deleteNodeTail(CircularLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->head == handle->tail) {
-        delete handle->head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -145,7 +202,7 @@ void deleteNodeTail(CircularLinkedListHandle_t handle) {
     // actualize tail
     handle->tail = current;
     // free memory
-    delete handle->tail->next;
+    free(handle->tail->next);
     handle->tail->next = handle->head;
 
     current = NULL;
@@ -162,7 +219,7 @@ void deleteNodeHead(CircularLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->capacity == 1) {
-        delete handle->head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -172,7 +229,7 @@ void deleteNodeHead(CircularLinkedListHandle_t handle) {
     handle->head = handle->head->next;
     handle->tail->next = handle->head;
     // free memory
-    delete temp;
+    free(temp);
 
     temp = NULL;
     --handle->capacity;

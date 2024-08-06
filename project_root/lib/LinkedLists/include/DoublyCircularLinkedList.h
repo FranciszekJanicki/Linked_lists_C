@@ -5,28 +5,28 @@
 
 
 typedef struct {
-    private:
-        Node *head;
-        Node *tail;
-        int capacity;
-        int size;
+    Node *head;
+    Node *tail;
+    int capacity;
+    int size;
 } DoublyCircularLinkedList;
 
 typedef DoublyCircularLinkedList* DoublyCircularLinkedListHandle_t;
 
 
-/* returns handle (pointer) */
-SinglyLinkedListHandle_t listCreateDynamic();
-/* returns object */
-SinglyLinkedList listCreateStatic();
-/* passing pointer to handle, changes what handle is pointing at */
-void listCreateDynamicVoid(SinglyLinkedListHandle_t *handle, const ListConfig_t *config);
-/* passing handle, changes object under handle */
-void listCreateStaticVoid(SinglyLinkedList *object);
-/* passing handle, but it could be nice to pass ptr to Handle to point it to NULL after deallocation */
-void listDelete(SinglyLinkedListHandle_t handle);
 
-/* private methods as they do not have exception handling and should be run only inside other methods that do have it*/
+/* return handle to dynamically allocated memory */
+DoublyCircularLinkedListHandle_t listCreateDynamically();
+/* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
+DoublyCircularLinkedList listCreateStatically();
+/* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
+DoublyCircularLinkedListHandle_t listCreateStaticStatically();
+/* dynamically allocate memory and point passed handle at it */
+void listCreateDynamicallyVoid(DoublyCircularLinkedListHandle_t *pHandle);
+/* statically allocate memory and copy it to memory under passed handle */
+void listCreateStaticallyVoid(DoublyCircularLinkedListHandle_t handle);
+/* need a pointer to handle in case memory under handle was allocated dynamically! */
+void listDelete(DoublyCircularLinkedListHandle_t handle);
 void insertEmptyBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right, Node* *newest);
 void insertBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right, const T *pData);
 void removeBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right);

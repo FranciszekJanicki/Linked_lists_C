@@ -4,6 +4,63 @@
 #include "DoublyCircularLinkedList.h"
 #include "node.h"
 
+
+/* return handle to dynamically allocated memory */
+DoublyCircularLinkedListHandle_t listCreateDynamically() {
+    DoublyCircularLinkedListHandle_t handle = (DoublyCircularLinkedListHandle_t)malloc(sizeof(DoublyCircularLinkedList));
+    assert(handle != NULL);
+    return handle;
+}
+
+/* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
+DoublyCircularLinkedList listCreateStatically() {
+    DoublyCircularLinkedList list
+    return list;
+}
+
+/* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
+DoublyCircularLinkedListHandle_t listCreateStaticStatically() {
+    static DoublyCircularLinkedList list;
+    DoublyCircularLinkedListHandle_t handle = &list;
+    return handle;
+}
+
+/* dynamically allocate memory and point passed handle at it */
+void listCreateDynamicallyVoid(DoublyCircularLinkedListHandle_t *pHandle) {
+    // assert that passed ptr to handle isnt NULL
+    assert(pHandle != NULL);
+
+    // allocate memory and point handle at it
+    *pHandle = (DoublyCircularLinkedListHandle_t)malloc(sizeof(DoublyCircularLinkedList));
+    // check if allocation succeded
+    assert(*pHandle != NULL);
+}
+
+/* statically allocate memory and copy it to memory under passed handle */
+void listCreateStaticallyVoid(DoublyCircularLinkedListHandle_t handle) {
+    DoublyCircularLinkedList list;
+    *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
+    // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!! APART FROM THAT 'handle' is a copy, to work on original handle would need *pHandle like above
+}
+
+/* if wanting to also free the handle pointer itself, would need to pass pointer to it, not just the copy */
+void listDelete(DoublyCircularLinkedListHandle_t handle) {
+    assert(handle != NULL);
+    // Node* current = handle->head;
+    // for (int i = 0; i < handle->capacity; ++i) {
+    //     free(current);
+    //     current = current->next;
+    // }
+    for (int i = 0; i < handle->capacity; ++i) {
+            deleteNodeHead(handle);
+    }
+
+    if (handle->head != NULL) free(handle->head);
+    if (handle->tail != NULL) free(handle->tail);
+
+    free(handle);
+}
+
 void insertEmptyBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
     assert(handle != NULL);
     assert(left != NULL && right != NULL);
@@ -41,7 +98,7 @@ void removeBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *ri
     assert(left->next->next == right && right->prev->prev == left);
 
     // free memory
-    delete left->next; 
+    free(left->next); 
     // join left and right
     left->next = right;
     right->prev = left;
@@ -138,7 +195,7 @@ void deleteNodeTail(DoublyCircularLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->head == handle->tail) {
-        delete handle->head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -148,7 +205,7 @@ void deleteNodeTail(DoublyCircularLinkedListHandle_t handle) {
     // actualize tail
     handle->tail = handle->tail->prev;
     // free memory
-    delete tail->next;
+    free(tail->next);
     // join head and tail
     handle->tail->next = handle->head;
     handle->head->prev = handle->tail;
@@ -166,7 +223,7 @@ void deleteNodeHead(DoublyCircularLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->capacity == 1) {
-        delete head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -174,7 +231,7 @@ void deleteNodeHead(DoublyCircularLinkedListHandle_t handle) {
     // actualize head
     handle->head = handle->head->next;
     // free memory
-    delete handle->head->prev;
+    free(handle->head->prev);
     // join head and tail
     handle->head->prev = handle->tail;
     handle->tail->next = handle->head;

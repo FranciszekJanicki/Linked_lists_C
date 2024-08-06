@@ -13,17 +13,18 @@ typedef struct {
 
 typedef SinglyLinkedList* SinglyLinkedListHandle_t;
 
-/* returns handle (pointer) */
-SinglyLinkedListHandle_t listCreateDynamic();
-/* returns object */
-SinglyLinkedList listCreateStatic();
-/* passing pointer to handle, changes what handle is pointing at */
-void listCreateDynamicVoid(SinglyLinkedListHandle_t *handle, const ListConfig_t *config);
-/* passing handle, changes object under handle */
-void listCreateStaticVoid(SinglyLinkedListHandle_t handle);
-/* passing handle, but it could be nice to pass ptr to Handle to point it to NULL after deallocation */
+/* return handle to dynamically allocated memory */
+SinglyLinkedListHandle_t listCreateDynamically();
+/* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
+SinglyLinkedList listCreateStatically();
+/* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
+SinglyLinkedListHandle_t listCreateStaticStatically();
+/* dynamically allocate memory and point passed handle at it */
+void listCreateDynamicallyVoid(SinglyLinkedListHandle_t *pHandle);
+/* statically allocate memory and copy it to memory under passed handle */
+void listCreateStaticallyVoid(SinglyLinkedListHandle_t handle);
+/* need a pointer to handle in case memory under handle was allocated dynamically! */
 void listDelete(SinglyLinkedListHandle_t handle);
-
 void insertEmptyBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest);
 void insertBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, const T *pData);
 void removeBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right);

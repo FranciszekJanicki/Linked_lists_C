@@ -5,6 +5,61 @@
 #include "node.h"
 
 
+/* return handle to dynamically allocated memory */
+DoublyLinkedListHandle_t listCreateDynamically() {
+    SinglyLinkedListHandle_t handle = (SinglyLinkedListHandle_t)malloc(sizeof(SinglyLinkedList));
+    assert(handle != NULL);
+    return handle;
+}
+
+/* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
+DoublyLinkedList listCreateStatically() {
+    DoublyLinkedList list
+    return list;
+}
+
+/* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
+DoublyLinkedListHandle_t listCreateStaticStatically() {
+    static DoublyLinkedList list;
+    DoublyLinkedListHandle_t handle = &list;
+    return handle;
+}
+
+/* dynamically allocate memory and point passed handle at it */
+void listCreateDynamicallyVoid(DoublyLinkedListHandle_t *pHandle) {
+    // assert that passed ptr to handle isnt NULL
+    assert(pHandle != NULL);
+
+    // allocate memory and point handle at it
+    *pHandle = (DoublyLinkedListHandle_t)malloc(sizeof(DoublyLinkedList));
+    // check if allocation succeded
+    assert(*pHandle != NULL);
+}
+
+/* statically allocate memory and copy it to memory under passed handle */
+void listCreateStaticallyVoid(DoublyLinkedListHandle_t handle) {
+    DoublyLinkedList list;
+    *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
+    // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!! APART FROM THAT 'handle' is a copy, to work on original handle would need *pHandle like above
+}
+
+/* if wanting to also free the handle pointer itself, would need to pass pointer to it, not just the copy */
+void listDelete(DoublyLinkedListHandle_t handle) {
+    assert(handle != NULL);
+    // Node* current = handle->head;
+    // for (int i = 0; i < handle->capacity; ++i) {
+    //     free(current);
+    //     current = current->next;
+    // }
+    for (int i = 0; i < handle->capacity; ++i) {
+            deleteNodeHead(handle);
+    }
+
+    if (handle->head != NULL) free(handle->head);
+    if (handle->tail != NULL) free(handle->tail);
+
+    free(handle);
+}
 
 void insertEmptyBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
     assert(handle != NULL);  
@@ -30,7 +85,7 @@ void insertBetween(DoublyLinkedListHandle_t handle, Node *left, Node *right, con
     assert(pData != NULL);
 
     Node *newest = NULL;
-    insertEmptyBetween(left, right, newest);
+    insertEmptyBetween(handle, left, right, newest);
     newest->data = *pData;
 
     ++handle->size;
@@ -83,7 +138,7 @@ void addNodeHead(DoublyLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeHead(newest);
+    addEmptyNodeHead(handle, &newest);
     newest->data = *pData;
 
     ++handle->size;
@@ -120,7 +175,7 @@ void addNodeTail(DoublyLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeTail(newest);
+    addEmptyNodeTail(handle, &newest);
     newest->data = *pData;
 
     ++size;
@@ -135,7 +190,7 @@ void deleteNodeTail(DoublyLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->head == handle->tail) {
-        delete handle->head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -143,7 +198,7 @@ void deleteNodeTail(DoublyLinkedListHandle_t handle) {
     // actualize tail
     handle->tail = handle->tail->prev;
     // free memory
-    delete handle->tail->next;
+    free(handle->tail->next);
     handle->tail->next = NULL;
 
     --handle->capacity;
@@ -159,7 +214,7 @@ void deleteNodeHead(DoublyLinkedListHandle_t handle) {
 
     // if list has 1 element
     if (handle->capacity == 1) {
-        delete handle->head;
+        free(handle->head);
         handle->head = handle->tail = NULL;
         return;
     }
@@ -167,7 +222,7 @@ void deleteNodeHead(DoublyLinkedListHandle_t handle) {
     // actualize head
     handle->head = handle->head->next;
     // free memory
-    delete handle->head->prev;
+    free(handle->head->prev);
     handle->head->prev = NULL;
 
     --handle->capacity;
@@ -185,8 +240,8 @@ void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pDa
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) addNodeHead(pData); // handle function checks if capacity is 0
-    else if (*pIndex == handle->capacity - 1) addNodeTail(pData); // handle function checks if capacity is 0
+    if (*pIndex == 0) addNodeHead(handle, pData); // handle function checks if capacity is 0
+    else if (*pIndex == handle->capacity - 1) addNodeTail(handle, pData); // handle function checks if capacity is 0
     else {
         // check if its faster to iterate from the front or the back, find pointers to node on pIndex and previous
         if (*pIndex < handle->capacity/2) {
@@ -195,7 +250,7 @@ void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pDa
                 previous = current;
                 current = current->next;
             }
-            insertBetween(previous, current, pData);
+            insertBetween(handle, previous, current, pData);
 
         } else {
             current = handle->tail;
@@ -203,23 +258,24 @@ void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pDa
                 previous = current;
                 current = current->prev;
             }
-            insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
+            insertBetween(handle, current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
             // iterating backwards, the previous is on the right and current on the left !!!
         }
 
         // OR
         /* 
         current = getNode(handle, *pIndex);
-        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
-        insertBetween(previous, current, pData);
+        prevIndex = *pIndex - 1;
+        previous = current->prev; // previous = getNode(handle, prevIndex);
+        insertBetween(handle, previous, current, pData);
         }
         */
 
         // OR
         /* 
-        previous = getNode(handle, *pIndex - 1);
-        current = previous->next; // current = getNode(handle, *pIndex);
-        insertBetween(previous, current, pData);
+        previous = getNode(handle, prevIndex);
+        current = previous->next; // current = getNode(handle, &(*pIndex-1));
+        insertBetween(handle, previous, current, pData);
         }
         */
     }
@@ -244,23 +300,23 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
     else {
         // erase current node
         current = getNode(handle, *pIndex);
-        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        previous = current->prev; // previous = getNode(handle, &(*pIndex - 1));
         removeBetween(previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
-        next = getNode(handle, *pIndex + 1);
-        previous = (current->prev)->prev; // previous = getNode(handle, *pIndex - 1);
-        removeBetween(previous, next);
+        next = getNode(handle, &(*pIndex + 1));
+        previous = (current->prev)->prev; // previous = getNode(handle, &(*pIndex - 1));
+        removeBetween(handle, previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
-        previous = getNode(handle, *pIndex - 1);
-        next = (previous->next)->next;// next = getNode(handle, *pIndex + 1); 
-        removeBetween(previous, next);
+        previous = getNode(handle, &(*pIndex - 1));
+        next = (previous->next)->next;// next = getNode(handle, &(*pIndex + 1)); 
+        removeBetween(handle, previous, next);
         */
 
        // OR
@@ -321,7 +377,7 @@ void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex) {
             previous = tmp;
         }          
 
-        removeBetween(previous, next);
+        removeBetween(handle, previous, next);
     }
 
     current = NULL;
@@ -340,19 +396,19 @@ void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData) {
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == head) deleteNodeHead(handle);
-            else if (current == tail) deleteNodeTail(handle);
+            if (current == handle->head) deleteNodeHead(handle);
+            else if (current == handle->tail) deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
                 previous->next = current->next;
                 (current->next)->prev = previous;
                 // free memory
-                delete current;
+                free(current);
 
                 // OR
                 // erase current node
-                removeBetween(previous, current->next);
+                removeBetween(handle, previous, current->next);
             }
             // return; // dont stop iterating, remove all nodes with handle pData
         }
@@ -469,7 +525,7 @@ void assign(DoublyLinkedListHandle_t handle, const T *array, const int *pLength)
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(handle, &toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
@@ -479,7 +535,7 @@ void assign(DoublyLinkedListHandle_t handle, const T *array, const int *pLength)
 
     /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
     /* for (i = 0; i < capacity; ++i) {
-        handle->setData(i, array[i]);
+        handle->setData(handle, &i, &array[i]);
     } 
     */
     Node *current = handle->head;
