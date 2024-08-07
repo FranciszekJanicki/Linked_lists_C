@@ -6,45 +6,45 @@
 
 
 /* return handle to dynamically allocated memory */
-SinglyLinkedListHandle_t listCreateDynamically() {
-    SinglyLinkedListHandle_t handle = (SinglyLinkedListHandle_t)malloc(sizeof(SinglyLinkedList));
+SinglyLinkedHandle_t sl_listCreateDynamically() {
+    SinglyLinkedHandle_t handle = (SinglyLinkedHandle_t)malloc(sizeof(SinglyLinkedList));
     assert(handle != NULL);
     return handle;
 }
 
 /* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
-SinglyLinkedList listCreateStatically() {
+SinglyLinkedList sl_listCreateStatically() {
     SinglyLinkedList list;
     return list;
 }
 
 /* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
-SinglyLinkedListHandle_t listCreateStaticStatically() {
+SinglyLinkedHandle_t sl_listCreateStaticStatically() {
     static SinglyLinkedList list;
-    SinglyLinkedListHandle_t handle = &list;
+    SinglyLinkedHandle_t handle = &list;
     return handle;
 }
 
 /* dynamically allocate memory and point passed handle at it */
-void listCreateDynamicallyVoid(SinglyLinkedListHandle_t *pHandle) {
+void sl_listCreateDynamicallyVoid(SinglyLinkedHandle_t *pHandle) {
     // assert that passed ptr to handle isnt NULL
     assert(pHandle != NULL);
 
     // allocate memory and point handle at it
-    *pHandle = (SinglyLinkedListHandle_t)malloc(sizeof(SinglyLinkedList));
+    *pHandle = (SinglyLinkedHandle_t)malloc(sizeof(SinglyLinkedList));
     // check if allocation succeded
     assert(*pHandle != NULL);
 }
 
 /* statically allocate memory and copy it to memory under passed handle */
-void listCreateStaticallyVoid(SinglyLinkedListHandle_t handle) {
+void sl_listCreateStaticallyVoid(SinglyLinkedHandle_t handle) {
     SinglyLinkedList list;
     *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
     // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!! APART FROM THAT 'handle' is a copy, to work on original handle would need *pHandle like above
 }
 
 /* if wanting to also free the handle pointer itself, would need to pass pointer to it, not just the copy */
-void listDelete(SinglyLinkedListHandle_t handle) {
+void sl_listDelete(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     // Node* current = handle->head;
     // for (int i = 0; i < handle->capacity; ++i) {
@@ -52,7 +52,7 @@ void listDelete(SinglyLinkedListHandle_t handle) {
     //     current = current->next;
     // }
     for (int i = 0; i < handle->capacity; ++i) {
-            deleteNodeHead(handle);
+            sl_deleteNodeHead(handle);
     }
 
     if (handle->head != NULL) free(handle->head);
@@ -61,7 +61,7 @@ void listDelete(SinglyLinkedListHandle_t handle) {
     free(handle);
 }
 
-void insertEmptyBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
+void sl_insertEmptyBetween(SinglyLinkedHandle_t handle, Node *left, Node *right, Node* *pNewest) {
     assert(pNewest != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next == right);
@@ -74,13 +74,13 @@ void insertEmptyBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right
 }
 
 
-void insertBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, const T *pData) {
+void sl_insertBetween(SinglyLinkedHandle_t handle, Node *left, Node *right, const T *pData) {
     assert(left != NULL && right != NULL);
     assert(left->next == right);
     assert(pData != NULL);
 
     Node *newest = NULL;
-    insertEmptyBetween(handle, left, right, &newest);
+    sl_insertEmptyBetween(handle, left, right, &newest);
     assert(newest != NULL);
     newest->data = *pData;
 
@@ -88,7 +88,7 @@ void insertBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right, con
 }
 
 
-void removeBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right) {
+void sl_removeBetween(SinglyLinkedHandle_t handle, Node *left, Node *right) {
     assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next->next == right);
@@ -103,7 +103,7 @@ void removeBetween(SinglyLinkedListHandle_t handle, Node *left, Node *right) {
 }
 
 
-void addEmptyNodeHead(SinglyLinkedListHandle_t handle, Node* *pNewest) {
+void sl_addEmptyNodeHead(SinglyLinkedHandle_t handle, Node* *pNewest) {
     assert(handle != NULL);
 
     // in single list dont have to check if list is empty or not for head insertion
@@ -116,12 +116,12 @@ void addEmptyNodeHead(SinglyLinkedListHandle_t handle, Node* *pNewest) {
 }
 
 
-void addNodeHead(SinglyLinkedListHandle_t handle, const T *pData) {
+void sl_addNodeHead(SinglyLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeHead(handle, &newest);
+    sl_addEmptyNodeHead(handle, &newest);
     assert(newest != NULL);
     newest->data = *pData;
     
@@ -129,7 +129,7 @@ void addNodeHead(SinglyLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void addEmptyNodeTail(SinglyLinkedListHandle_t handle, Node* *pNewest) {
+void sl_addEmptyNodeTail(SinglyLinkedHandle_t handle, Node* *pNewest) {
     assert(handle != NULL);
 
     *pNewest = (Node *)malloc(sizeof(Node));
@@ -151,12 +151,12 @@ void addEmptyNodeTail(SinglyLinkedListHandle_t handle, Node* *pNewest) {
     ++handle->capacity;
 }
 
-void addNodeTail(SinglyLinkedListHandle_t handle, const T *pData) {
+void sl_addNodeTail(SinglyLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeTail(handle, &newest);
+    sl_addEmptyNodeTail(handle, &newest);
     assert(newest != NULL); 
     newest->data = *pData;
 
@@ -164,7 +164,7 @@ void addNodeTail(SinglyLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void deleteNodeTail(SinglyLinkedListHandle_t handle) {
+void sl_deleteNodeTail(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
 
     // if list empty
@@ -214,7 +214,7 @@ void deleteNodeTail(SinglyLinkedListHandle_t handle) {
 }
 
 
-void deleteNodeHead(SinglyLinkedListHandle_t handle) {
+void sl_deleteNodeHead(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
 
     // if list empty
@@ -239,7 +239,7 @@ void deleteNodeHead(SinglyLinkedListHandle_t handle) {
 }
 
 
-void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+void sl_insertNode(SinglyLinkedHandle_t handle, const int *pIndex, const T *pData) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     assert(pData != NULL);
@@ -249,16 +249,16 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) addNodeHead(handle, pData); 
-    else if (*pIndex == handle->capacity) addNodeTail(handle, pData);
+    if (*pIndex == 0) sl_addNodeHead(handle, pData); 
+    else if (*pIndex == handle->capacity) sl_addNodeTail(handle, pData);
     else {
 
         // just need to find second to last to pIndex (because you can calculate current (*pIndex) by previous->next)
         // find previous index and index
         int prev_index = *pIndex - 1;
-        previous = getNode(handle, &prev_index);
-        current = previous->next; // current = getNode(handle, pIndex);
-        insertBetween(handle, previous, current, pData);
+        previous = sl_getNode(handle, &prev_index);
+        current = previous->next; // current = sl_getNode(handle, pIndex);
+        sl_insertBetween(handle, previous, current, pData);
 
         // OR
         /*
@@ -270,7 +270,7 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
             previous = current;
             current = current->next;
         }
-        insertBetween(handle, previous, current, pData);
+        sl_insertBetween(handle, previous, current, pData);
         */
     }
     // OR
@@ -281,10 +281,10 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 
     while (current != NULL) {
         if (i == *pIndex) {
-            if (current == handle->head) addNodeHead(handle, pData);
-            else if (current == handle->tail) addNodetail(handle, pData);
+            if (current == handle->head) sl_addNodeHead(handle, pData);
+            else if (current == handle->tail) sl_addNodetail(handle, pData);
             else {
-                insertBetween(handle, previous, current, pData);
+                sl_insertBetween(handle, previous, current, pData);
             }
             return; // stop iterating
         }
@@ -299,7 +299,7 @@ void insertNode(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 }
 
 
-void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
+void sl_removeNode(SinglyLinkedHandle_t handle, const T *pIndex) {
     assert(handle != NULL);  
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
@@ -309,33 +309,33 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) deleteNodeHead(handle);    
-    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
+    if (*pIndex == 0) sl_deleteNodeHead(handle);    
+    else if (*pIndex == handle->capacity - 1) sl_deleteNodeTail(handle);
     else {
         // erase current node
-        current = getNode(handle, pIndex);
+        current = sl_getNode(handle, pIndex);
         int prev_index = *pIndex - 1;
-        previous = current->prev; // previous = getNode(handle, &prev_index);
-        removeBetween(handle, previous, current->next);
+        previous = current->prev; // previous = sl_getNode(handle, &prev_index);
+        sl_removeBetween(handle, previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
         int next_index = *pIndex + 1;
-        next = getNode(handle, &next_index);
+        next = sl_getNode(handle, &next_index);
         int prev_index = *pIndex - 1;
-        previous = (next->prev)->prev; // previous = getNode(handle, &prev_index);
-        removeBetween(handle, previous, next);
+        previous = (next->prev)->prev; // previous = sl_getNode(handle, &prev_index);
+        sl_removeBetween(handle, previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
         int prev_index = *pIndex - 1;
-        previous = getNode(handle, &prev_index);
+        previous = sl_getNode(handle, &prev_index);
         int next_index = *pIndex + 1;
-        next = (previous->next)->next;// next = getNode(handle, &next_index); 
-        removeBetween(handle, previous, next);
+        next = (previous->next)->next;// next = sl_getNode(handle, &next_index); 
+        sl_removeBetween(handle, previous, next);
         */
 
        // OR
@@ -397,7 +397,7 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
             previous = tmp;
         }          
 
-        removeBetween(handle, previous, next);
+        sl_removeBetween(handle, previous, next);
         */
     }
 
@@ -408,7 +408,7 @@ void removeNode(SinglyLinkedListHandle_t handle, const T *pIndex) {
 
 
 
-void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
+void sl_removeNodeElement(SinglyLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
     Node *current = handle->head;
@@ -418,8 +418,8 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == handle->head) deleteNodeHead(handle);
-            else if (current == handle->tail) deleteNodeTail(handle);
+            if (current == handle->head) sl_deleteNodeHead(handle);
+            else if (current == handle->tail) sl_deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
@@ -431,7 +431,7 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
 
                 // OR
                 // erase current node
-                // removeBetween(handle, previous, current->next);
+                // sl_removeBetween(handle, previous, current->next);
 
             }
             // return; // dont stop iterating, remove all nodes with handle pData
@@ -446,7 +446,7 @@ void removeNodeElement(SinglyLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void print(SinglyLinkedListHandle_t handle) {
+void sl_print(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     // if list empty, avoid dereferencing NULL
     if (handle->head != NULL) {
@@ -460,31 +460,31 @@ void print(SinglyLinkedListHandle_t handle) {
 }
 
 
-int getCapacity(SinglyLinkedListHandle_t handle) {
+int sl_getCapacity(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     return handle->capacity;
 }
 
 
-int getSize(SinglyLinkedListHandle_t handle) {
+int sl_getSize(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     return handle->size;
 }
 
 
-Node *getHead(SinglyLinkedListHandle_t handle) {
+Node *sl_getHead(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     return handle->head;
 }
 
 
-Node *getTail(SinglyLinkedListHandle_t handle) {
+Node *sl_getTail(SinglyLinkedHandle_t handle) {
     assert(handle != NULL);
     return handle->tail;
 }
 
 
-Node *getNode(SinglyLinkedListHandle_t handle, const int *pIndex) {
+Node *sl_getNode(SinglyLinkedHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
@@ -492,8 +492,8 @@ Node *getNode(SinglyLinkedListHandle_t handle, const int *pIndex) {
 
     Node *current = NULL;
 
-    if (*pIndex == 0) return getHead(handle);
-    else if (*pIndex == handle->capacity - 1) return getTail(handle);
+    if (*pIndex == 0) return sl_getHead(handle);
+    else if (*pIndex == handle->capacity - 1) return sl_getTail(handle);
     else {
         current = handle->head;
         int i = 0;
@@ -506,20 +506,20 @@ Node *getNode(SinglyLinkedListHandle_t handle, const int *pIndex) {
     }
 }
 
-T getData(SinglyLinkedListHandle_t handle, const int *pIndex) {
+T sl_getData(SinglyLinkedHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
-    return getNode(handle, pIndex)->data;
+    return sl_getNode(handle, pIndex)->data;
 }
 
-void setData(SinglyLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+void sl_setData(SinglyLinkedHandle_t handle, const int *pIndex, const T *pData) {
     assert(handle != NULL);
     assert(pIndex != NULL);    
     assert(pData != NULL);
-    getNode(handle, pIndex)->data = *pData;
+    sl_getNode(handle, pIndex)->data = *pData;
 }
 
-void assign(SinglyLinkedListHandle_t handle, const T *pArray, const int *pLength) {
+void sl_assign(SinglyLinkedHandle_t handle, const T *pArray, const int *pLength) {
     assert(handle != NULL);
     assert(pLength != NULL);
     assert(pArray!= NULL && *pLength > 0);
@@ -530,17 +530,17 @@ void assign(SinglyLinkedListHandle_t handle, const T *pArray, const int *pLength
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            addEmptyNodeTail(handle, &toAdd);
+            sl_addEmptyNodeTail(handle, &toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
-            deleteNodeTail(handle);
+            sl_deleteNodeTail(handle);
         }
     }
 
     /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
     /* for (i = 0; i < handle->capacity; ++i) {
-        handle->setData(handle, &i, &pArray[i]);
+        handle->sl_setData(handle, &i, &pArray[i]);
     } 
     */
     Node *current = handle->head;

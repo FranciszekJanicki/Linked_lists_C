@@ -6,45 +6,45 @@
 
 
 /* return handle to dynamically allocated memory */
-CircularLinkedListHandle_t listCreateDynamically() {
-    CircularLinkedListHandle_t handle = (CircularLinkedListHandle_t)malloc(sizeof(CircularLinkedList));
+CircLinkedHandle_t cl_listCreateDynamically() {
+    CircLinkedHandle_t handle = (CircLinkedHandle_t)malloc(sizeof(CircularLinkedList));
     assert(handle != NULL);
     return handle;
 }
 
 /* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
-CircularLinkedList listCreateStatically() {
+CircularLinkedList cl_listCreateStatically() {
     CircularLinkedList list;
     return list;
 }
 
 /* return pointer to statically allocated static memory (statically allocated- either copy it somwehwere or make it static (like here to be able to not copy it and take pointer, without static keyword this staically alloated memory would vanish!)!) */
-CircularLinkedListHandle_t listCreateStaticStatically() {
+CircLinkedHandle_t cl_listCreateStaticStatically() {
     static CircularLinkedList list;
-    CircularLinkedListHandle_t handle = &list;
+    CircLinkedHandle_t handle = &list;
     return handle;
 }
 
 /* dynamically allocate memory and point passed handle at it */
-void listCreateDynamicallyVoid(CircularLinkedListHandle_t *pHandle) {
+void cl_listCreateDynamicallyVoid(CircLinkedHandle_t *pHandle) {
     // assert that passed ptr to handle isnt NULL
     assert(pHandle != NULL);
 
     // allocate memory and point handle at it
-    *pHandle = (CircularLinkedListHandle_t)malloc(sizeof(CircularLinkedList)); 
+    *pHandle = (CircLinkedHandle_t)malloc(sizeof(CircularLinkedList)); 
     // check if allocation succeded
     assert(*pHandle != NULL);
 }
 
 /* statically allocate memory and copy it to memory under passed handle */
-void listCreateStaticallyVoid(CircularLinkedListHandle_t handle) {
+void cl_listCreateStaticallyVoid(CircLinkedHandle_t handle) {
     CircularLinkedList list;
     *handle = list; // memcpy(handle, &list, sizeof(list)); // OK, COPYING STATICALLY ALLOCATED MEMORY
     // handle = &list; // WRONG!!! POINTING TO MEMORY THAT WILL GET DESTROYED AFTER THIS SCOPE RETURNS!!! APART FROM THAT 'handle' is a copy, to work on original handle would need *pHandle like above
 }
 
 /* if wanting to also free the handle pointer itself, would need to pass pointer to it, not just the copy */
-void listDelete(CircularLinkedListHandle_t handle) {
+void cl_listDelete(CircLinkedHandle_t handle) {
     assert(handle != NULL);
     // Node* current = handle->head;
     // for (int i = 0; i < handle->capacity; ++i) {
@@ -52,7 +52,7 @@ void listDelete(CircularLinkedListHandle_t handle) {
     //     current = current->next;
     // }
     for (int i = 0; i < handle->capacity; ++i) {
-            deleteNodeHead(handle);
+            cl_deleteNodeHead(handle);
     }
 
     if (handle->head != NULL) free(handle->head);
@@ -61,7 +61,7 @@ void listDelete(CircularLinkedListHandle_t handle) {
     free(handle);
 }
 
-void insertEmptyBetween(CircularLinkedListHandle_t handle, Node *left, Node *right, Node* *pNewest) {
+void cl_insertEmptyBetween(CircLinkedHandle_t handle, Node *left, Node *right, Node* *pNewest) {
     assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next == right);
@@ -74,14 +74,14 @@ void insertEmptyBetween(CircularLinkedListHandle_t handle, Node *left, Node *rig
 }
 
 
-void insertBetween(CircularLinkedListHandle_t handle, Node *left, Node *right, const T *pData) {
+void cl_insertBetween(CircLinkedHandle_t handle, Node *left, Node *right, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next == right);
 
     Node *newest = NULL;
-    insertEmptyBetween(handle, left, right, &newest);
+    cl_insertEmptyBetween(handle, left, right, &newest);
     assert(newest != NULL); 
     newest->data = *pData;
 
@@ -89,7 +89,7 @@ void insertBetween(CircularLinkedListHandle_t handle, Node *left, Node *right, c
 }
 
 
-void removeBetween(CircularLinkedListHandle_t handle, Node *left, Node *right) {
+void cl_removeBetween(CircLinkedHandle_t handle, Node *left, Node *right) {
     assert(handle != NULL);
     assert(left != NULL && right != NULL);
     assert(left->next->next == right);
@@ -104,7 +104,7 @@ void removeBetween(CircularLinkedListHandle_t handle, Node *left, Node *right) {
 }
 
 
-void addEmptyNodeHead(CircularLinkedListHandle_t handle, Node* *pNewest) {
+void cl_addEmptyNodeHead(CircLinkedHandle_t handle, Node* *pNewest) {
     assert(handle != NULL);
 
     *pNewest = (Node *)malloc(sizeof(Node));
@@ -127,12 +127,12 @@ void addEmptyNodeHead(CircularLinkedListHandle_t handle, Node* *pNewest) {
 }
 
 
-void addNodeHead(CircularLinkedListHandle_t handle, const T *pData) {
+void cl_addNodeHead(CircLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeHead(handle, &newest);
+    cl_addEmptyNodeHead(handle, &newest);
     assert(newest != NULL); 
     newest->data = *pData;
     
@@ -140,7 +140,7 @@ void addNodeHead(CircularLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void addEmptyNodeTail(CircularLinkedListHandle_t handle, Node* *pNewest) {
+void cl_addEmptyNodeTail(CircLinkedHandle_t handle, Node* *pNewest) {
     assert(handle != NULL);
 
     *pNewest = (Node *)malloc(sizeof(Node));
@@ -163,12 +163,12 @@ void addEmptyNodeTail(CircularLinkedListHandle_t handle, Node* *pNewest) {
 }
 
 
-void addNodeTail(CircularLinkedListHandle_t handle, const T *pData) {
+void cl_addNodeTail(CircLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeTail(handle, &newest);
+    cl_addEmptyNodeTail(handle, &newest);
     assert(newest != NULL); 
     newest->data = *pData;
 
@@ -176,7 +176,7 @@ void addNodeTail(CircularLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void deleteNodeTail(CircularLinkedListHandle_t handle) {
+void cl_deleteNodeTail(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     // if list empty
@@ -214,7 +214,7 @@ void deleteNodeTail(CircularLinkedListHandle_t handle) {
 }
 
 
-void deleteNodeHead(CircularLinkedListHandle_t handle) {
+void cl_deleteNodeHead(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     // if list empty
@@ -242,7 +242,7 @@ void deleteNodeHead(CircularLinkedListHandle_t handle) {
 
 
 
-void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+void cl_insertNode(CircLinkedHandle_t handle, const int *pIndex, const T *pData) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     assert(pData != NULL);
@@ -252,16 +252,16 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) addNodeHead(handle, pData); 
-    else if (*pIndex == handle->capacity) addNodeTail(handle, pData);
+    if (*pIndex == 0) cl_addNodeHead(handle, pData); 
+    else if (*pIndex == handle->capacity) cl_addNodeTail(handle, pData);
     else {
 
         // just need to find second to last to pIndex (because you can calculate current (*pIndex) by previous->next)
         // find previous index and index
         int prev_index = *pIndex - 1;
-        previous = getNode(handle, &prev_index);
+        previous = cl_getNode(handle, &prev_index);
         current = previous->next; // current = getNode(handle, pIndex);
-        insertBetween(handle, current, previous, pData);
+        cl_insertBetween(handle, current, previous, pData);
 
         // OR
         /*
@@ -273,7 +273,7 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
             previous = current;
             current = current->next;
         }
-        insertBetween(previous, current, pData);
+        cl_insertBetween(previous, current, pData);
         */
     }
     // OR
@@ -284,10 +284,10 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
 
     while (current != NULL) {
         if (i == *pIndex) {
-            if (current == handle->head) addNodeHead(pData);
-            else if (current == handle->tail) addNodetail(pData);
+            if (current == handle->head) cl_addNodeHead(pData);
+            else if (current == handle->tail) cl_addNodetail(pData);
             else {
-                insertBetween(previous, current, pData);
+                cl_insertBetween(previous, current, pData);
             }
             return; // stop iterating
         }
@@ -302,7 +302,7 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
 }
 
 
-void removeNode(CircularLinkedListHandle_t handle, const T *pIndex) {
+void cl_removeNode(CircLinkedHandle_t handle, const T *pIndex) {
     assert(handle != NULL);  
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
@@ -312,33 +312,33 @@ void removeNode(CircularLinkedListHandle_t handle, const T *pIndex) {
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) deleteNodeHead(handle);    
-    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
+    if (*pIndex == 0) cl_deleteNodeHead(handle);    
+    else if (*pIndex == handle->capacity - 1) cl_deleteNodeTail(handle);
     else {
         // erase current node
-        current = getNode(handle, pIndex);
+        current = cl_getNode(handle, pIndex);
         int prev_index = *pIndex - 1;
         previous = current->prev; // previous = getNode(handle, &prev_index);
-        removeBetween(handle, previous, current->next);
+        cl_removeBetween(handle, previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
         int next_index = *pIndex + 1;
-        next = getNode(handle, &next_index);
+        next = cl_getNode(handle, &next_index);
         int prev_index = *pIndex - 1;
-        previous = (next->prev)->prev; // previous = getNode(handle, &prev_index);
-        removeBetween(handle, previous, next);
+        previous = (next->prev)->prev; // previous = cl_getNode(handle, &prev_index);
+        cl_removeBetween(handle, previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
         int prev_index = *pIndex - 1;
-        previous = getNode(handle, &prev_index);
+        previous = cl_getNode(handle, &prev_index);
         int next_index = *pIndex + 1;
-        next = (previous->next)->next;// next = getNode(handle, &next_index); 
-        removeBetween(handle, previous, next);
+        next = (previous->next)->next;// next = cl_getNode(handle, &next_index); 
+        cl_removeBetween(handle, previous, next);
         */
 
        // OR
@@ -400,7 +400,7 @@ void removeNode(CircularLinkedListHandle_t handle, const T *pIndex) {
             previous = tmp;
         }          
 
-        removeBetween(handle, previous, next);
+        cl_removeBetween(handle, previous, next);
         */
     }
 
@@ -411,7 +411,7 @@ void removeNode(CircularLinkedListHandle_t handle, const T *pIndex) {
 
 
 
-void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
+void cl_removeNodeElement(CircLinkedHandle_t handle, const T *pData) {
     assert(handle != NULL);
     assert(pData != NULL);
 
@@ -422,8 +422,8 @@ void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
     while (current != NULL) {
         
         if (current->data == *pData) {
-            if (current == handle->head) deleteNodeHead(handle);
-            else if (current == handle->tail) deleteNodeTail(handle);
+            if (current == handle->head) cl_deleteNodeHead(handle);
+            else if (current == handle->tail) cl_deleteNodeTail(handle);
             else {
                 // erase current node
                 // join previous and next to current
@@ -435,7 +435,7 @@ void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
 
                 // OR
                 // erase current node
-                // removeBetween(previous, current->next);
+                // cl_removeBetween(previous, current->next);
 
             }
             // return; // dont stop iterating, remove all nodes with handle pData
@@ -450,7 +450,7 @@ void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
 }
 
 
-void print(CircularLinkedListHandle_t handle) {
+void cl_print(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     // if list empty, avoid dereferencing NULL
@@ -465,35 +465,35 @@ void print(CircularLinkedListHandle_t handle) {
 }
 
 
-int getCapacity(CircularLinkedListHandle_t handle) {
+int cl_getCapacity(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     return handle->capacity;
 }
 
 
-int getSize(CircularLinkedListHandle_t handle) {
+int cl_getSize(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     return handle->size;
 }
 
 
-Node *getHead(CircularLinkedListHandle_t handle) {
+Node *cl_getHead(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     return handle->head;
 }
 
 
-Node *getTail(CircularLinkedListHandle_t handle) {
+Node *cl_getTail(CircLinkedHandle_t handle) {
     assert(handle != NULL);
 
     return handle->tail;
 }
 
 
-Node *getNode(CircularLinkedListHandle_t handle, const int *pIndex) {
+Node *cl_getNode(CircLinkedHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
@@ -501,8 +501,8 @@ Node *getNode(CircularLinkedListHandle_t handle, const int *pIndex) {
 
     Node *current = NULL;
 
-    if (*pIndex == 0) return getHead(handle);
-    else if (*pIndex == handle->capacity - 1) return getTail(handle);
+    if (*pIndex == 0) return cl_getHead(handle);
+    else if (*pIndex == handle->capacity - 1) return cl_getTail(handle);
     else {
         current = handle->head;
         int i = 0;
@@ -516,24 +516,24 @@ Node *getNode(CircularLinkedListHandle_t handle, const int *pIndex) {
 }
 
 
-T getData(CircularLinkedListHandle_t handle, const int *pIndex) {
+T cl_getData(CircLinkedHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
 
-    return getNode(handle, pIndex)->data;
+    return cl_getNode(handle, pIndex)->data;
 }
 
 
-void setData(CircularLinkedListHandle_t handle, const int *pIndex, const T *pData) {
+void cl_setData(CircLinkedHandle_t handle, const int *pIndex, const T *pData) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     assert(pData != NULL);
 
-    getNode(handle, pIndex)->data = *pData;
+    cl_getNode(handle, pIndex)->data = *pData;
 }
 
 
-void assign(CircularLinkedListHandle_t handle, const T *pArray, const int *pLength) {
+void cl_assign(CircLinkedHandle_t handle, const T *pArray, const int *pLength) {
     assert(handle != NULL);
     assert(pLength != NULL);
     assert(pArray!= NULL && *pLength > 0);
@@ -544,17 +544,17 @@ void assign(CircularLinkedListHandle_t handle, const T *pArray, const int *pLeng
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            addEmptyNodeTail(handle, &toAdd);
+            cl_addEmptyNodeTail(handle, &toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
-            deleteNodeTail(handle);
+            cl_deleteNodeTail(handle);
         }
     }
 
     /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
     /* for (i = 0; i < handle->capacity; ++i) {
-        handle->setData(handle, &i, &pArray[i]);
+        handle->cl_setData(handle, &i, &pArray[i]);
     } 
     */
     Node *current = handle->head;

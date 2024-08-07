@@ -1,7 +1,7 @@
-// #include "SinglyLinkedList.h"
-// #include "DoublyLinkedList.h"
-// #include "CircularLinkedList.h"
-// #include "DoublyCircularLinkedList.h"
+#include "SinglyLinkedList.h"
+#include "DoublyLinkedList.h"
+#include "CircularLinkedList.h"
+#include "DoublyCircularLinkedList.h"
 
 
 int main(int, char**) {
