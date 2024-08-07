@@ -13,7 +13,7 @@ typedef struct {
     int size;
 } CircularLinkedList;
 
-typedef CircularLinkedList* CircularLinkedListHandle_t;
+typedef CircularLinkedList *CircularLinkedListHandle_t;
 
 
 /* return handle to dynamically allocated memory */
@@ -48,7 +48,7 @@ Node *getTail(CircularLinkedListHandle_t handle);
 Node *getNode(CircularLinkedListHandle_t handle, const int *pIndex);
 T getpData(CircularLinkedListHandle_t handle, const int *pIndex);
 void setData(CircularLinkedListHandle_t handle, const int *pIndex, const T *pData);
-void assign(CircularLinkedListHandle_t handle, const T *array, const int *pLength);
+void assign(CircularLinkedListHandle_t handle, const T *pArray, const int *pLength);
 
 
 #endif // CIRCULAR_LINKED_LIST_H

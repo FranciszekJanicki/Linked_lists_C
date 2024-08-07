@@ -14,7 +14,7 @@ CircularLinkedListHandle_t listCreateDynamically() {
 
 /* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
 CircularLinkedList listCreateStatically() {
-    CircularLinkedList list
+    CircularLinkedList list;
     return list;
 }
 
@@ -67,10 +67,10 @@ void insertEmptyBetween(CircularLinkedListHandle_t handle, Node *left, Node *rig
     assert(left->next == right);
 
     *pNewest = (Node *)malloc(sizeof(Node));
-    newest->next = right;
+    (*pNewest)->next = right;
     left->next = *pNewest;
 
-    ++capacity;
+    ++handle->capacity;
 }
 
 
@@ -81,7 +81,8 @@ void insertBetween(CircularLinkedListHandle_t handle, Node *left, Node *right, c
     assert(left->next == right);
 
     Node *newest = NULL;
-    insertEmptyBetween(left, right, newest);
+    insertEmptyBetween(handle, left, right, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
 
     ++handle->size;
@@ -110,13 +111,13 @@ void addEmptyNodeHead(CircularLinkedListHandle_t handle, Node* *pNewest) {
 
     // if list empty
     if (handle->head == NULL) {
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         // actualize head and tail
         handle->head = handle->tail = *pNewest;
     }
     // not empty
     else {
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         // actualize head
         handle->head = *pNewest;
         handle->tail->next = handle->head;
@@ -131,7 +132,8 @@ void addNodeHead(CircularLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeHead(newest);
+    addEmptyNodeHead(handle, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
     
     ++handle->size;
@@ -145,13 +147,13 @@ void addEmptyNodeTail(CircularLinkedListHandle_t handle, Node* *pNewest) {
 
     // if list empty
     if (handle->tail == NULL) {        
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         // actualize head and tail
         handle->head = handle->tail = *pNewest;
     } 
     // not empty
     else {
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         handle->tail->next = *pNewest;
         // actualize tail
         handle->tail = *pNewest;
@@ -166,7 +168,8 @@ void addNodeTail(CircularLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeTail(newest);
+    addEmptyNodeTail(handle, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
 
     ++handle->size;
@@ -244,20 +247,21 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
     assert(pIndex != NULL);
     assert(pData != NULL);
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) addNodeHead(pData); 
-    else if (*pIndex == handle->capacity) addNodeTail(pData);
+    if (*pIndex == 0) addNodeHead(handle, pData); 
+    else if (*pIndex == handle->capacity) addNodeTail(handle, pData);
     else {
 
         // just need to find second to last to pIndex (because you can calculate current (*pIndex) by previous->next)
-        // find previous pIndex and pIndex
-        previous = getNode(handle, *pIndex - 1);
-        current = previous->next; // current = getNode(handle, *pIndex);
-        insertBetween(previous, current, pData);
+        // find previous index and index
+        int prev_index = *pIndex - 1;
+        previous = getNode(handle, &prev_index);
+        current = previous->next; // current = getNode(handle, pIndex);
+        insertBetween(handle, current, previous, pData);
 
         // OR
         /*
@@ -299,58 +303,112 @@ void insertNode(CircularLinkedListHandle_t handle, const int *pIndex, const T *p
 
 
 void removeNode(CircularLinkedListHandle_t handle, const T *pIndex) {
-    assert(handle != NULL);
+    assert(handle != NULL);  
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
     Node *next = NULL;
 
-    if (*pIndex == 0) deleteNodeHead(handle); // handle function checks if capacity is 0
-    else if (*pIndex == handle->capacity) deleteNodeTail(handle); // handle function checks if capacity is 0
+    if (*pIndex == 0) deleteNodeHead(handle);    
+    else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
     else {
         // erase current node
-        previous = getNode(handle, *pIndex - 1);
-        current = previous->next; // current = getNode(handle, *pIndex);
-        removeBetween(previous, current->next);
+        current = getNode(handle, pIndex);
+        int prev_index = *pIndex - 1;
+        previous = current->prev; // previous = getNode(handle, &prev_index);
+        removeBetween(handle, previous, current->next);
 
         // OR
+        // erase node between previous and next
         /*
-        // erase node between previous and next (erase current node)
-        previous = getNode(handle, *pIndex - 1);
-        next = (previous->next)->next;// next = current->next; // next = getNode(handle, *pIndex + 1); 
-        removeBetween(previous, current->next);
+        int next_index = *pIndex + 1;
+        next = getNode(handle, &next_index);
+        int prev_index = *pIndex - 1;
+        previous = (next->prev)->prev; // previous = getNode(handle, &prev_index);
+        removeBetween(handle, previous, next);
+        */
+
+        // OR
+        // erase node between previous and next
+        /*
+        int prev_index = *pIndex - 1;
+        previous = getNode(handle, &prev_index);
+        int next_index = *pIndex + 1;
+        next = (previous->next)->next;// next = getNode(handle, &next_index); 
+        removeBetween(handle, previous, next);
+        */
+
+       // OR
+       // erase current node 
+       /*
+       if (*pIndex < handle->capacity/2) {
+            // find previous and next
+            current = handle->head;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->next;
+            }
+            next = current->next;
+            // free memory
+            free(current);
+            previous->next = next;
+            next->prev = previous;
+            
+
+        } else {
+            // NOTE that here previous is on the right, next on the left, because of iterating backwards!
+            current = handle->tail;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->prev;
+            }
+            next = current->prev;
+            // free memory
+            free(current);
+            // join next and previous (knowinh they are 'logically' swapped)
+            next->next = previous;
+            previous->prev = next;
+        }   
+        */
+       
+        // OR
+        // erase current node but swap previous and next when iterating backward and use same formula
+        /*
+        if (*pIndex < handle->capacity/2) {
+            // find previous and next
+            current = handle->head;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->next;
+            }
+            next = current->next;
+            
+        } else {
+            // find previous and next
+            current = handle->tail;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->prev;
+            }
+            next = current->prev;
+            // swap
+            Node *tmp = next;
+            next = previous;
+            previous = tmp;
+        }          
+
+        removeBetween(handle, previous, next);
         */
     }
 
-    // OR
-    /*
-    int i = 0;
-    current = handle->head;
-    while (current != NULL) {
-        
-        if (i == *pIndex) {
-            if (current == handle->head) deleteNodeHead(handle);
-            else if (current == handle->tail) deleteNodeTail(handle);
-            else {
-                // erase current node
-                removeBetween(previous, current->next);
-      
-            }
-            return; // stop iterating
-        }
-
-        previous = current;
-        current = current->next;
-        ++i; 
-    }
-    */
-
-    previous = NULL;
     current = NULL;
+    previous = NULL;
+    next = NULL;
 }
+
 
 
 void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
@@ -371,7 +429,7 @@ void removeNodeElement(CircularLinkedListHandle_t handle, const T *pData) {
                 // join previous and next to current
                 previous->next = current->next;
                 // free memory
-                delete current;
+                free(current);
                 --handle->capacity;
                 --handle->size;
 
@@ -439,7 +497,7 @@ Node *getNode(CircularLinkedListHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
 
@@ -462,7 +520,7 @@ T getData(CircularLinkedListHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);
 
-    return getNode(handle, *pIndex)->data;
+    return getNode(handle, pIndex)->data;
 }
 
 
@@ -471,22 +529,22 @@ void setData(CircularLinkedListHandle_t handle, const int *pIndex, const T *pDat
     assert(pIndex != NULL);
     assert(pData != NULL);
 
-    getNode(handle, *pIndex)->data = *pData;
+    getNode(handle, pIndex)->data = *pData;
 }
 
 
-void assign(CircularLinkedListHandle_t handle, const T *array, const int *pLength) {
+void assign(CircularLinkedListHandle_t handle, const T *pArray, const int *pLength) {
     assert(handle != NULL);
     assert(pLength != NULL);
-    assert(array != NULL && length > 0);
-
+    assert(pArray!= NULL && *pLength > 0);
+    
     // resize
     int sizeDifference = *pLength - handle->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(handle, &toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
@@ -495,13 +553,13 @@ void assign(CircularLinkedListHandle_t handle, const T *array, const int *pLengt
     }
 
     /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
-    /* for (i = 0; i < capacity; ++i) {
-        handle->setData(i, array[i]);
+    /* for (i = 0; i < handle->capacity; ++i) {
+        handle->setData(handle, &i, &pArray[i]);
     } 
     */
     Node *current = handle->head;
     for (i = 0; i < handle->capacity; ++i) {
-        current->data = array[i];
+        current->data = pArray[i];
         current = current->next;
     }
 }

@@ -9,6 +9,6 @@ typedef struct Node {
     T data;
 } Node;
 
-// typedef Node* Node;
+typedef Node *NodeHandle_t;
 
 #endif // NODE_H

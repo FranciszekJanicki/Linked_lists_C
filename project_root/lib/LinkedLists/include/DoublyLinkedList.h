@@ -13,7 +13,7 @@ typedef struct {
     int size;
 } DoublyLinkedList;
 
-typedef DoublyLinkedList* DoublyLinkedListHandle_t;
+typedef DoublyLinkedList *DoublyLinkedListHandle_t;
 
 
 /* return handle to dynamically allocated memory */
@@ -41,14 +41,14 @@ void insertNode(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pDa
 void removeNode(DoublyLinkedListHandle_t handle, const T *pIndex);
 void removeNodeElement(DoublyLinkedListHandle_t handle, const T *pData);
 void print(DoublyLinkedListHandle_t handle);
-int getCapacity();
+int getCapacity(DoublyLinkedListHandle_t handle);
 int getSize(DoublyLinkedListHandle_t handle);
-Node *getHead();
+Node *getHead(DoublyLinkedListHandle_t handle);
 Node *getTail(DoublyLinkedListHandle_t handle);
 Node *getNode(DoublyLinkedListHandle_t handle, const int *pIndex);
 T getData(DoublyLinkedListHandle_t handle, const int *pIndex);
 void setData(DoublyLinkedListHandle_t handle, const int *pIndex, const T *pData);
-void assign(DoublyLinkedListHandle_t handle, const T *array, const int *pLength);
+void assign(DoublyLinkedListHandle_t handle, const T *pArray, const int *pLength);
 
 
 #endif // DOUBLY_LINKED_LIST_H

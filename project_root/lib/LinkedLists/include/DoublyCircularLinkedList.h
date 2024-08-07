@@ -11,7 +11,7 @@ typedef struct {
     int size;
 } DoublyCircularLinkedList;
 
-typedef DoublyCircularLinkedList* DoublyCircularLinkedListHandle_t;
+typedef DoublyCircularLinkedList *DoublyCircularLinkedListHandle_t;
 
 
 
@@ -46,8 +46,8 @@ Node *getHead(DoublyCircularLinkedListHandle_t handle);
 Node *getTail(DoublyCircularLinkedListHandle_t handle);
 Node *getNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex);
 T getData(DoublyCircularLinkedListHandle_t handle, const int *pIndex);
-void setData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T pData);
-void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *pLength);
+void setData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T *pData);
+void assign(DoublyCircularLinkedListHandle_t handle, const T *pArray, const int *pLength);
 
 
 #endif // DOUBLY_CIRCULAR_LINKED_LIST_H

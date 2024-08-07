@@ -14,7 +14,7 @@ DoublyCircularLinkedListHandle_t listCreateDynamically() {
 
 /* return statically allocated memory (statically allocated- either copy it somewhere (like here to return variable) or make it static!)*/
 DoublyCircularLinkedList listCreateStatically() {
-    DoublyCircularLinkedList list
+    DoublyCircularLinkedList list;
     return list;
 }
 
@@ -68,10 +68,10 @@ void insertEmptyBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Nod
 
     *pNewest = (Node *)malloc(sizeof(Node));
     // join newest and right
-    *pNewest->next = right;
+    (*pNewest)->next = right;
     right->prev = *pNewest;
     // join newest and left
-    *pNewest->prev = left;
+    (*pNewest)->prev = left;
     left->next = *pNewest;
 
     ++handle->capacity;
@@ -85,7 +85,8 @@ void insertBetween(DoublyCircularLinkedListHandle_t handle, Node *left, Node *ri
     assert(pData != NULL);
 
     Node *newest = NULL;
-    insertEmptyBetween(left, right, newest);
+    insertEmptyBetween(handle, left, right, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
     
     ++handle->size;
@@ -116,17 +117,17 @@ void addEmptyNodeHead(DoublyCircularLinkedListHandle_t handle, Node* *pNewest) {
     // if list empty
     if (handle->head == NULL) {
         // join newest with head and tail and actualize
-        *pNewest->next = handle->head;
-        *pNewest->prev = handle->tail;
-        *pNewest->head = handle->tail = *pNewest;
+        (*pNewest)->next = handle->head;
+        (*pNewest)->prev = handle->tail;
+        handle->head = handle->tail = *pNewest;
     } 
     // not empty
     else {
         // join newest and head
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         handle->head->prev = *pNewest;
         // join newest ant tail
-        *pNewest->prev = handle->tail;
+        (*pNewest)->prev = handle->tail;
         handle->tail->next = *pNewest;
         // actualize head
         handle->head = *pNewest;
@@ -141,7 +142,8 @@ void addNodeHead(DoublyCircularLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
 
     Node *newest = NULL;
-    addEmptyNodeHead(newest);
+    addEmptyNodeHead(handle, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
 
     ++handle->size;
@@ -156,17 +158,17 @@ void addEmptyNodeTail(DoublyCircularLinkedListHandle_t handle, Node* *pNewest) {
     // if list empty
     if (handle->tail == NULL) {
         // join newest with head and tail and actualize
-        *pNewest->next = handle->head;
-        *pNewest->prev = handle->tail;
+        (*pNewest)->next = handle->head;
+        (*pNewest)->prev = handle->tail;
         handle->tail = handle->head = *pNewest;
     } 
     // not empty
     else {
         // join newest and head
-        *pNewest->next = handle->head;
+        (*pNewest)->next = handle->head;
         handle->head->prev = *pNewest;
         // join newest and tail
-        *pNewest->prev = handle->tail;
+        (*pNewest)->prev = handle->tail;
         handle->tail->next = *pNewest;
         // actualize tail
         handle->tail = *pNewest;  
@@ -181,7 +183,8 @@ void addNodeTail(DoublyCircularLinkedListHandle_t handle, const T *pData) {
     assert(pData != NULL);
    
     Node *newest = NULL;
-    addEmptyNodeTail(newest);
+    addEmptyNodeTail(handle, &newest);
+    assert(newest != NULL); 
     newest->data = *pData;
 
     ++handle->size;
@@ -205,7 +208,7 @@ void deleteNodeTail(DoublyCircularLinkedListHandle_t handle) {
     // actualize tail
     handle->tail = handle->tail->prev;
     // free memory
-    free(tail->next);
+    free(handle->tail->next);
     // join head and tail
     handle->tail->next = handle->head;
     handle->head->prev = handle->tail;
@@ -247,13 +250,13 @@ void insertNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex, cons
     assert(pData != NULL);
 
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
 
-    if (*pIndex == 0) addNodeHead(pData); // handle function checks if capacity is 0
-    else if (*pIndex == handle->capacity - 1) addNodeTail(pData); // handle function checks if capacity is 0
+    if (*pIndex == 0) addNodeHead(handle, pData); // handle function checks if capacity is 0
+    else if (*pIndex == handle->capacity - 1) addNodeTail(handle, pData); // handle function checks if capacity is 0
     else {
         // check if its faster to iterate from the front or the back, find pointers to node on pIndex and previous
         if (*pIndex < handle->capacity/2) {
@@ -262,7 +265,7 @@ void insertNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex, cons
                 previous = current;
                 current = current->next;
             }
-            insertBetween(previous, current, pData);
+            insertBetween(handle, previous, current, pData);
 
         } else {
             current = handle->tail;
@@ -270,22 +273,24 @@ void insertNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex, cons
                 previous = current;
                 current = current->prev;
             }
-            insertBetween(current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
+            insertBetween(handle, current, previous, pData); // !!! insertBetween function is made to take node to the left and to the right as parameters, so when
             // iterating backwards, the previous is on the right and current on the left !!!
         }
 
         // OR
         /* 
-        current = getNode(handle, *pIndex);
-        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
+        current = getNode(handle, pIndex);
+        int prev_index = *pIndex - 1;
+        previous = current->prev; // previous = getNode(handle, &prev_index);
         insertBetween(previous, current, pData);
         }
         */
 
         // OR
         /* 
-        previous = getNode(handle, *pIndex - 1);
-        current = previous->next; // current = getNode(handle, *pIndex);
+        int prev_index = *pIndex - 1;
+        previous = getNode(handle, &prev_index);
+        current = previous->next; // current = getNode(handle, pIndex);
         insertBetween(previous, current, pData);
         }
         */
@@ -301,7 +306,7 @@ void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
     assert(pIndex != NULL);    
 
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
     Node *previous = NULL;
@@ -311,24 +316,29 @@ void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
     else if (*pIndex == handle->capacity - 1) deleteNodeTail(handle);
     else {
         // erase current node
-        current = getNode(handle, *pIndex);
-        previous = current->prev; // previous = getNode(handle, *pIndex - 1);
-        removeBetween(previous, current->next);
+        current = getNode(handle, pIndex);
+        int prev_index = *pIndex - 1;
+        previous = current->prev; // previous = getNode(handle, &prev_index);
+        removeBetween(handle, previous, current->next);
 
         // OR
         // erase node between previous and next
         /*
-        next = getNode(handle, *pIndex + 1);
-        previous = (current->prev)->prev; // previous = getNode(handle, *pIndex - 1);
-        removeBetween(previous, next);
+        int next_index = *pIndex + 1;
+        next = getNode(handle, &next_index);
+        int prev_index = *pIndex - 1;
+        previous = (next->prev)->prev; // previous = getNode(handle, &prev_index);
+        removeBetween(handle, previous, next);
         */
 
         // OR
         // erase node between previous and next
         /*
-        previous = getNode(handle, *pIndex - 1);
-        next = (previous->next)->next;// next = getNode(handle, *pIndex + 1); 
-        removeBetween(previous, next);
+        int prev_index = *pIndex - 1;
+        previous = getNode(handle, &prev_index);
+        int next_index = *pIndex + 1;
+        next = (previous->next)->next;// next = getNode(handle, &next_index); 
+        removeBetween(handle, previous, next);
         */
 
        // OR
@@ -343,7 +353,7 @@ void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
             }
             next = current->next;
             // free memory
-            delete current;
+            free(current);
             previous->next = next;
             next->prev = previous;
             
@@ -357,7 +367,7 @@ void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
             }
             next = current->prev;
             // free memory
-            delete current;
+            free(current);
             // join next and previous (knowinh they are 'logically' swapped)
             next->next = previous;
             previous->prev = next;
@@ -366,30 +376,32 @@ void removeNode(DoublyCircularLinkedListHandle_t handle, const T *pIndex) {
        
         // OR
         // erase current node but swap previous and next when iterating backward and use same formula
-        // if (*pIndex < handle->capacity/2) {
-        //     // find previous and next
-        //     current = handle->head;
-        //     for (int i = 0; i < *pIndex; ++i) {
-        //         previous = current;
-        //         current = current->next;
-        //     }
-        //     next = current->next;
+        /*
+        if (*pIndex < handle->capacity/2) {
+            // find previous and next
+            current = handle->head;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->next;
+            }
+            next = current->next;
             
-        // } else {
-        //     // find previous and next
-        //     current = tail;
-        //     for (int i = 0; i < *pIndex; ++i) {
-        //         previous = current;
-        //         current = current->prev;
-        //     }
-        //     next = current->prev;
-        //     // swap
-        //     Node *tmp = next;
-        //     next = previous;
-        //     previous = tmp;
-        // }          
+        } else {
+            // find previous and next
+            current = handle->tail;
+            for (int i = 0; i < *pIndex; ++i) {
+                previous = current;
+                current = current->prev;
+            }
+            next = current->prev;
+            // swap
+            Node *tmp = next;
+            next = previous;
+            previous = tmp;
+        }          
 
-        // removeBetween(previous, next);
+        removeBetween(handle, previous, next);
+        */
     }
 
     current = NULL;
@@ -416,11 +428,11 @@ void removeNodeElement(DoublyCircularLinkedListHandle_t handle, const T *pData) 
                 previous->next = current->next;
                 (current->next)->prev = previous;
                 // free memory
-                delete current;
+                free(current);
 
                 // OR
                 // erase current node
-                removeBetween(previous, current->next);
+                removeBetween(handle, previous, current->next);
             }
             // return; // dont stop iterating, remove all nodes with handle pData
         }
@@ -482,7 +494,7 @@ Node *getNode(DoublyCircularLinkedListHandle_t handle, const int *pIndex) {
     assert(pIndex != NULL);  
 
     // handle incorrect pIndex, wont have to worry later
-    assert(*pIndex >= 0 && pIndex < handle->capacity);
+    assert(*pIndex >= 0 && *pIndex < handle->capacity);
 
     Node *current = NULL;
 
@@ -514,7 +526,7 @@ T getData(DoublyCircularLinkedListHandle_t handle, const int *pIndex) {
     assert(handle != NULL);
     assert(pIndex != NULL);  
 
-    return getNode(handle, *pIndex)->data;
+    return getNode(handle, pIndex)->data;
 }
 
 
@@ -523,23 +535,21 @@ void setData(DoublyCircularLinkedListHandle_t handle, const int *pIndex, const T
     assert(pIndex != NULL);    
     assert(pData != NULL);
 
-    getNode(handle, *pIndex)->data = *pData;
+    getNode(handle, pIndex)->data = *pData;
 }
 
-
-
-void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *pLength) {
+void assign(DoublyCircularLinkedListHandle_t handle, const T *pArray, const int *pLength) {
     assert(handle != NULL);
     assert(pLength != NULL);
-    assert(array != NULL && length > 0);
-
+    assert(pArray!= NULL && *pLength > 0);
+    
     // resize
     int sizeDifference = *pLength - handle->capacity;
     int i;
     if (sizeDifference > 0) {    
         for (i = 0; i < sizeDifference; ++i) {
             Node *toAdd = NULL;
-            addEmptyNodeTail(toAdd);
+            addEmptyNodeTail(handle, &toAdd);
         }
     } else if (sizeDifference < 0) {
         for (i = 0; i < -sizeDifference; ++i) {
@@ -548,13 +558,13 @@ void assign(DoublyCircularLinkedListHandle_t handle, const T *array, const int *
     }
 
     /* handle has shitty complexity as every iteration will call getNode function, which iterates to the pIndex*/
-    /* for (i = 0; i < capacity; ++i) {
-        handle->setData(i, array[i]);
+    /* for (i = 0; i < handle->capacity; ++i) {
+        handle->setData(handle, &i, &pArray[i]);
     } 
     */
     Node *current = handle->head;
     for (i = 0; i < handle->capacity; ++i) {
-        current->data = array[i];
+        current->data = pArray[i];
         current = current->next;
     }
 }
